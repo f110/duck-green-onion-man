@@ -33,7 +33,7 @@ my $id = $message_ids[0];
 $res = $mech->get($url."view_message.pl?id=".$id."&box=inbox");
 $tree = HTML::TreeBuilder::XPath->new_from_content($res->decoded_content);
 
-warn $tree->findvalues(q{//div[@id='message_body']});
+warn $tree->findnodes(q{//div[@id='message_body']});
 warn $tree->findnodes(q{//div[@class='messageDetailHead']/dl/dd});
 
 __END__
@@ -47,6 +47,10 @@ url-opener.pl
 
     carton install
     carton exec -- perl url-opener.pl
+
+=head1 MEMO
+
+自宅でログイン試行しすぎたらBANされて解除されてないorz
 
 =head1 AUTHOR
 

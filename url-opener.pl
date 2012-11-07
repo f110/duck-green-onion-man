@@ -5,9 +5,11 @@ use WWW::Mechanize::Plugin::FollowMetaRedirect;
 use HTML::TreeBuilder::XPath;
 use AnyEvent;
 use List::Compare qw//;
+use Encode;
 
 use Data::Dumper;
 
+my $debug = 1;
 my $config_file = "./config.pl";
 my $conf = do $config_file or die;
 
@@ -32,33 +34,65 @@ $tree = HTML::TreeBuilder::XPath->new_from_content($res->decoded_content);
 my @messages = $tree->findvalues(q{//td[@class='subject']/a/@href});
 my @message_ids = map { $_ =~ m/id=([0-9a-f]{32})/; $1} @messages;
 
+warn "start timer";
 my $cv = AnyEvent->condvar;
-my $timer = AnyEvent->timer(
-    interval => 60,
-    cb => sub {
-        my $res = $mech->get($url."list_message.pl");
-        my $tree = HTML::TreeBuilder::XPath->new_from_content($res->decoded_content);
-
-        my @new_messages = $tree->findvalues(q{//td[@class='subject']/a/@href});
-        my @new_message_ids = map { $_ =~ m/id=([0-9a-f]{32})/; $1} @messages;
-
-        my $lc = List::Compare->new(\@message_ids, \@new_message_ids);
-
-        my @Ronly = $lc->get_Ronly;
-
-        foreach my $id (@Ronly) {
-            $res = $mech->get($url."view_message.pl?id=".$id."&box=inbox");
-            $tree = HTML::TreeBuilder::XPath->new_from_content($res->decoded_content);
-
-            warn $tree->findnodes(q{//div[@id='message_body']});
-            warn $tree->findnodes(q{//div[@class='messageDetailHead']/dl/dd});
-        }
-    },
-);
+timer_callback();
+#my $timer = AnyEvent->timer(
+    #interval => 60,
+    #cb => \&timer_callback,
+#);
 
 $cv->recv;
 
 exit;
+
+sub timer_callback {
+    my $res = $mech->get($url."list_message.pl");
+    my $tree = HTML::TreeBuilder::XPath->new_from_content($res->decoded_content);
+
+    my @new_messages = $tree->findvalues(q{//td[@class='subject']/a/@href});
+    my @new_message_ids = map { $_ =~ m/id=([0-9a-f]{32})/; $1} @messages;
+
+    my $lc = List::Compare->new(\@message_ids, \@new_message_ids);
+
+    my @Ronly = $lc->get_Ronly;
+
+    # for debug
+    my $id = $new_message_ids[0];
+    my @urls;
+    #foreach my $id (@Ronly) {
+        $res = $mech->get($url."view_message.pl?id=".$id."&box=inbox");
+        $tree = HTML::TreeBuilder::XPath->new_from_content($res->decoded_content);
+
+        my $message_body = $tree->findnodes(q{//div[@id='message_body']});
+        foreach my $line ($message_body->pop->content_list) {
+            unless ($line->isa("HTML::Element")) {
+                if ($line =~ m#$url/[a-z_]+\.pl\?[a-z0-9_=]#) {
+                    push @urls, $&;
+                }
+            }
+
+            if ($debug) {
+                if ($line->isa("HTML::Element")) {
+                    if ($line->tag eq "br") {
+                        print "\n";
+                    }
+                } else {
+                    print encode_utf8($line);
+                }
+            }
+        }
+        $cv->send;
+        my $sender = $tree->findnodes(q{//div[@class='messageDetailHead']/dl/dd});
+        foreach my $line ($sender->pop->content_list) {
+            if ($line->isa("HTML::Element")) {
+                warn $line->tag;
+            }
+        }
+    #}
+
+    push @message_ids, @Ronly;
+}
 
 __END__
 =pod

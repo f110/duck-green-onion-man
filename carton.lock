@@ -195,6 +195,176 @@
          "target" : "AnyEvent",
          "version" : "7.02"
       },
+      "Bit::Vector" : {
+         "dist" : "Bit-Vector-7.2",
+         "mymeta" : {
+            "abstract" : "unknown",
+            "author" : [
+               "unknown"
+            ],
+            "dynamic_config" : 0,
+            "generated_by" : "ExtUtils::MakeMaker version 6.56, CPAN::Meta::Converter version 2.120921",
+            "license" : [
+               "unknown"
+            ],
+            "meta-spec" : {
+               "url" : "http://search.cpan.org/perldoc?CPAN::Meta::Spec",
+               "version" : "2"
+            },
+            "name" : "Bit-Vector",
+            "no_index" : {
+               "directory" : [
+                  "t",
+                  "inc"
+               ]
+            },
+            "prereqs" : {
+               "build" : {
+                  "requires" : {
+                     "ExtUtils::MakeMaker" : "0"
+                  }
+               },
+               "configure" : {
+                  "requires" : {
+                     "ExtUtils::MakeMaker" : "0"
+                  }
+               },
+               "runtime" : {
+                  "requires" : {
+                     "Carp::Clan" : "5.3",
+                     "Storable" : "2.21"
+                  }
+               }
+            },
+            "release_status" : "stable",
+            "version" : "7.2"
+         },
+         "name" : "Bit::Vector",
+         "pathname" : "S/ST/STBEY/Bit-Vector-7.2.tar.gz",
+         "provides" : {
+            "Bit::Vector" : {
+               "file" : "Bit/Vector.pm",
+               "version" : "7.2"
+            },
+            "Bit::Vector::Overload" : {
+               "file" : "Bit/Vector/Overload.pm",
+               "version" : "7.2"
+            },
+            "Bit::Vector::String" : {
+               "file" : "Bit/Vector/String.pm",
+               "version" : "7.2"
+            }
+         },
+         "target" : "Bit::Vector",
+         "version" : "7.2"
+      },
+      "Carp::Clan" : {
+         "dist" : "Carp-Clan-6.04",
+         "mymeta" : {
+            "abstract" : "Report errors from perspective of caller of a \"clan\" of modules",
+            "author" : [
+               "Steffen Beyer <STBEY@cpan.org>"
+            ],
+            "dynamic_config" : 0,
+            "generated_by" : "ExtUtils::MakeMaker version 6.42, CPAN::Meta::Converter version 2.120921",
+            "license" : [
+               "perl_5"
+            ],
+            "meta-spec" : {
+               "url" : "http://search.cpan.org/perldoc?CPAN::Meta::Spec",
+               "version" : "2"
+            },
+            "name" : "Carp-Clan",
+            "prereqs" : {
+               "build" : {
+                  "requires" : {
+                     "ExtUtils::MakeMaker" : "0"
+                  }
+               },
+               "runtime" : {
+                  "requires" : {
+                     "Test::Exception" : "0"
+                  }
+               }
+            },
+            "release_status" : "stable",
+            "version" : "6.04"
+         },
+         "name" : "Carp::Clan",
+         "pathname" : "S/ST/STBEY/Carp-Clan-6.04.tar.gz",
+         "provides" : {
+            "Carp::Clan" : {
+               "file" : "Carp/Clan.pm",
+               "version" : "6.04"
+            }
+         },
+         "target" : "Carp::Clan",
+         "version" : "6.04"
+      },
+      "Date::Calc" : {
+         "dist" : "Date-Calc-6.3",
+         "mymeta" : {
+            "abstract" : "Gregorian calendar date calculations",
+            "author" : [
+               "Steffen Beyer <STBEY@cpan.org>"
+            ],
+            "dynamic_config" : 0,
+            "generated_by" : "ExtUtils::MakeMaker version 6.42, CPAN::Meta::Converter version 2.120921",
+            "license" : [
+               "perl_5"
+            ],
+            "meta-spec" : {
+               "url" : "http://search.cpan.org/perldoc?CPAN::Meta::Spec",
+               "version" : "2"
+            },
+            "name" : "Date-Calc",
+            "prereqs" : {
+               "build" : {
+                  "requires" : {
+                     "ExtUtils::MakeMaker" : "0"
+                  }
+               },
+               "runtime" : {
+                  "requires" : {
+                     "Bit::Vector" : "7.1",
+                     "Carp::Clan" : "6.04"
+                  }
+               }
+            },
+            "release_status" : "stable",
+            "version" : "6.3"
+         },
+         "name" : "Date::Calc",
+         "pathname" : "S/ST/STBEY/Date-Calc-6.3.tar.gz",
+         "provides" : {
+            "Date::Calc" : {
+               "file" : "Date/Calc.pm",
+               "version" : "6.3"
+            },
+            "Date::Calc::Object" : {
+               "file" : "Date/Calc/Object.pm",
+               "version" : "6.3"
+            },
+            "Date::Calc::PP" : {
+               "file" : "Date/Calc/PP.pm",
+               "version" : "6.3"
+            },
+            "Date::Calendar" : {
+               "file" : "Date/Calendar.pm",
+               "version" : "6.3"
+            },
+            "Date::Calendar::Profiles" : {
+               "file" : "Date/Calendar/Profiles.pm",
+               "version" : "6.3"
+            },
+            "Date::Calendar::Year" : {
+               "file" : "Date/Calendar/Year.pm",
+               "version" : "6.3"
+            }
+         },
+         "target" : "Date::Calc",
+         "version" : "6.3"
+      },
       "Encode::Locale" : {
          "dist" : "Encode-Locale-1.03",
          "mymeta" : {
@@ -2476,6 +2646,65 @@
          },
          "target" : "Sub::Uplevel",
          "version" : "0.24"
+      },
+      "Test::Exception" : {
+         "dist" : "Test-Exception-0.31",
+         "mymeta" : {
+            "abstract" : "Test exception based code",
+            "author" : [
+               "Adrian Howard <adrianh@quietstars.com>"
+            ],
+            "dynamic_config" : 0,
+            "generated_by" : "Module::Build version 0.3901, CPAN::Meta::Converter version 2.120921",
+            "license" : [
+               "perl_5"
+            ],
+            "meta-spec" : {
+               "url" : "http://search.cpan.org/perldoc?CPAN::Meta::Spec",
+               "version" : "2"
+            },
+            "name" : "Test-Exception",
+            "prereqs" : {
+               "configure" : {
+                  "requires" : {
+                     "Module::Build" : "0.36"
+                  }
+               },
+               "runtime" : {
+                  "requires" : {
+                     "Sub::Uplevel" : "0.18",
+                     "Test::Builder" : "0.7",
+                     "Test::Builder::Tester" : "1.07",
+                     "Test::Harness" : "2.03",
+                     "Test::More" : "0.7",
+                     "Test::Simple" : "0.7"
+                  }
+               }
+            },
+            "provides" : {
+               "Test::Exception" : {
+                  "file" : "lib/Test/Exception.pm",
+                  "version" : "0.31"
+               }
+            },
+            "release_status" : "stable",
+            "resources" : {
+               "license" : [
+                  "http://dev.perl.org/licenses/"
+               ]
+            },
+            "version" : "0.31"
+         },
+         "name" : "Test::Exception",
+         "pathname" : "A/AD/ADIE/Test-Exception-0.31.tar.gz",
+         "provides" : {
+            "Test::Exception" : {
+               "file" : "Test/Exception.pm",
+               "version" : "0.31"
+            }
+         },
+         "target" : "Test::Exception",
+         "version" : "0.31"
       },
       "Test::Fatal" : {
          "dist" : "Test-Fatal-0.010",

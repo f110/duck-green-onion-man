@@ -114,6 +114,21 @@ url-opener.pl
 
 自宅でログイン試行しすぎたらBANされて解除されないorz
 
+=head1 OPTIONS
+
+引数は与えられません。
+フラグがハードコーディングされているのでプログラムを自分で修正してください。
+
+=over
+
+=item growl_notify
+
+新しいメッセージがあったらGrowl通知をします。
+
+growlnotifyコマンドがパスが通ったディレクトリにインストールされている必要があります。
+
+=back
+
 =head1 AUTHOR
 
 Fumihiro Ito <fmhrit@gmail.com>

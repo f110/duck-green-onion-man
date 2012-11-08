@@ -15,6 +15,7 @@ my $debug = 1;
 my $growl_notify = 0;
 my $notify_to_phone = 0; # 0 or "kayac" or "notifo"
 my $auto_url_open = 0;
+my $auto_message_open = 0;
 my $config_file = "./config.pl";
 my $conf = do $config_file or die;
 
@@ -100,7 +101,12 @@ sub timer_callback {
     my $id = $new_message_ids[0];
     #foreach my $id (@Ronly) {
         my @urls;
+
         $res = $mech->get($url."view_message.pl?id=".$id."&box=inbox");
+        if ($auto_message_open) {
+            system qq#open -a $url/view_message.pl?id="$id"&box=inbox#;
+        }
+
         $tree = HTML::TreeBuilder::XPath->new_from_content($res->decoded_content);
 
         my $message_body = $tree->findnodes(q{//div[@id='message_body']});
@@ -131,7 +137,7 @@ sub timer_callback {
 
         if ($auto_url_open and scalar @urls > 0 and scalar @urls <= 5) {
             foreach (@urls) {
-                system qq#open -a 'Google Chrome' $_#;
+                system qq#open -a $_#;
             }
         }
     #}
@@ -139,6 +145,8 @@ sub timer_callback {
 
 __END__
 =pod
+
+=encoding utf-8
 
 =head1 NAME
 
@@ -194,6 +202,13 @@ http://notifo.com/
 メッセージ内にURLが含まれていた場合は自動で開きます．
 
 メッセージ内に5個以上URLが含まれていた場合は開きません．
+
+system関数からopenコマンドを実行しています．
+標準のブラウザとして指定されているもので開きます．（特にアプリケーションの指定なし）
+
+=item auto_message_open
+
+自動で新着メッセージを開きます．自動でメッセージ内のURLを開くのが怖い人はこちらがオススメ．
 
 =back
 

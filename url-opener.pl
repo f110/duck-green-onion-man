@@ -11,6 +11,7 @@ use Data::Dumper;
 
 my $debug = 1;
 my $growl_notify = 0;
+my $notify_to_phone = 0;
 my $config_file = "./config.pl";
 my $conf = do $config_file or die;
 
@@ -57,8 +58,21 @@ sub timer_callback {
     my $lc = List::Compare->new(\@message_ids, \@new_message_ids);
 
     my @Ronly = $lc->get_Ronly;
-    if ($growl_notify) {
+    if (scalar @Ronly > 0 and $growl_notify) {
         system q#growlnotify -t "鴨ネギ男" -m "Got new message!"#;
+    }
+
+    if (scalar @Ronly > 0 and $notify_to_phone) {
+        require Furl;
+
+        my $furl = Furl->new;
+        $furl->post(
+            "http://im.kayac.com/api/post/".$config->{im_kayac_username},
+            {},
+            {
+                message => 'Got new message!',
+            }
+        );
     }
 
     # for debug

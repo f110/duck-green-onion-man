@@ -8,6 +8,7 @@ use List::Compare qw//;
 use Encode;
 use HTTP::Request;
 use LWP::UserAgent;
+use Date::Calc qw//;
 
 use Data::Dumper;
 
@@ -76,18 +77,19 @@ sub timer_callback {
     # push notification
     if ($notify_to_phone) {
         my $ua = LWP::UserAgent->new;
+        my $req;
         if ($notify_to_phone eq "notifo") {
-            my $req = HTTP::Request->new(POST => "https://api.notifo.com/v1/send_message");
+            $req = HTTP::Request->new(POST => "https://api.notifo.com/v1/send_message");
 
-            $req->content("to=".$config->{notifo_username}."&msg=Got new Message!");
+            $req->content("to=".$conf->{notifo_username}."&msg=Got new Message!");
             $req->authorization_basic(
-                $config->{notifo_username},
-                $config->{notifo_apisecret}
+                $conf->{notifo_username},
+                $conf->{notifo_apisecret}
             );
             $req->content_type('application/x-www-form-urlencoded');
         } elsif ($notify_to_phone eq "kayac") {
-            my $req = HTTP::Request->new(
-                POST => "http://im.kayac.com/api/post/".$config->{im_kayac_username}
+            $req = HTTP::Request->new(
+                POST => "http://im.kayac.com/api/post/".$conf->{im_kayac_username}
             );
             $req->content("message=Got new Message!");
             $req->content_type('application/x-www-form-urlencoded');
@@ -100,11 +102,18 @@ sub timer_callback {
     # for debug
     my $id = $new_message_ids[0];
     #foreach my $id (@Ronly) {
+        my ($hour, $min, $sec) = Date::Calc::Now();
+        print "--------------------\n";
+        print "New Message!\n";
+        print $hour.":".$min.":".$sec."\n";
+        print "--------------------\n";
         my @urls;
 
-        $res = $mech->get($url."view_message.pl?id=".$id."&box=inbox");
+        my $view_message_url = $url."view_message.pl?id=".$id."&box=inbox";
+        print $view_message_url."\n";
+        $res = $mech->get($view_message_url);
         if ($auto_message_open) {
-            system qq#open -a $url/view_message.pl?id="$id"&box=inbox#;
+            system qq#open -a $view_message_url#;
         }
 
         $tree = HTML::TreeBuilder::XPath->new_from_content($res->decoded_content);
@@ -135,11 +144,15 @@ sub timer_callback {
             }
         }
 
-        if ($auto_url_open and scalar @urls > 0 and scalar @urls <= 5) {
-            foreach (@urls) {
+        foreach (@urls) {
+            print $_."\n";
+            # 自動でURLを開くオプションがenableだった場合かつURLが5個以内だった場合は開く
+            if ($auto_url_open and scalar @urls > 0 and scalar @urls <= 5) {
                 system qq#open -a $_#;
             }
         }
+
+        print "\n";
     #}
 }
 

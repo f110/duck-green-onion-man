@@ -61,12 +61,19 @@ sub timer_callback {
     my $lc = List::Compare->new(\@message_ids, \@new_message_ids);
 
     my @Ronly = $lc->get_Ronly;
-    if (scalar @Ronly > 0 and $growl_notify) {
+
+    # 新規メッセージがないなら終了
+    return if scalar @Ronly == 0;
+
+    push @message_ids, @Ronly;
+
+    # notification
+    if ($growl_notify) {
         system q#growlnotify -t '鴨ネギ男' -m 'Got new message!'#;
     }
 
     # push notification
-    if (scalar @Ronly > 0 and $notify_to_phone) {
+    if ($notify_to_phone) {
         my $ua = LWP::UserAgent->new;
         if ($notify_to_phone eq "notifo") {
             my $req = HTTP::Request->new(POST => "https://api.notifo.com/v1/send_message");
@@ -87,15 +94,12 @@ sub timer_callback {
         }
         $ua->request($req);
     }
-
-    push @message_ids, @Ronly;
-
-    return if scalar @Ronly == 0;
+    # end of notification section
 
     # for debug
     my $id = $new_message_ids[0];
-    my @urls;
     #foreach my $id (@Ronly) {
+        my @urls;
         $res = $mech->get($url."view_message.pl?id=".$id."&box=inbox");
         $tree = HTML::TreeBuilder::XPath->new_from_content($res->decoded_content);
 
@@ -122,6 +126,12 @@ sub timer_callback {
         foreach my $line ($sender->pop->content_list) {
             if ($line->isa("HTML::Element")) {
                 warn $line->tag;
+            }
+        }
+
+        if ($auto_url_open and scalar @urls > 0 and scalar @urls <= 5) {
+            foreach (@urls) {
+                system qq#open -a 'Google Chrome' $_#;
             }
         }
     #}
@@ -178,6 +188,12 @@ Androidへ通知を送る事も出来ます．
 http://im.kayac.com/
 
 http://notifo.com/
+
+=item auto_url_open
+
+メッセージ内にURLが含まれていた場合は自動で開きます．
+
+メッセージ内に5個以上URLが含まれていた場合は開きません．
 
 =back
 

@@ -3,8 +3,8 @@ use warnings;
 use LWP::UserAgent;
 use HTTP::Request;
 
-my $username = "rightoverture";
-my $apisecret = 'x90b1530afee6701ca835b63b774df8bf168f8805';
+my $username = "";
+my $apisecret = '';
 
 my $req = HTTP::Request->new(POST => "https://api.notifo.com/v1/send_message");
 $req->content("to=".$username."&msg=Got new Message!");

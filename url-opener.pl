@@ -43,11 +43,10 @@ my @message_ids = map { $_ =~ m/id=([0-9a-f]{32})/; $1} @messages;
 
 warn "start timer";
 my $cv = AnyEvent->condvar;
-timer_callback();
-#my $timer = AnyEvent->timer(
-    #interval => 60,
-    #cb => \&timer_callback,
-#);
+my $timer = AnyEvent->timer(
+    interval => 60,
+    cb => \&timer_callback,
+);
 
 $cv->recv;
 
@@ -99,8 +98,7 @@ sub timer_callback {
     # end of notification section
 
     # for debug
-    my $id = $new_message_ids[0];
-    #foreach my $id (@Ronly) {
+    foreach my $id (@Ronly) {
         my ($hour, $min, $sec) = Date::Calc::Now();
         print "--------------------\n";
         print "New Message!\n";
@@ -135,7 +133,6 @@ sub timer_callback {
                 }
             }
         }
-        $cv->send;
         my $sender = $tree->findnodes(q{//div[@class='messageDetailHead']/dl/dd});
         foreach my $line ($sender->pop->content_list) {
             if ($line->isa("HTML::Element")) {
@@ -152,7 +149,7 @@ sub timer_callback {
         }
 
         print "\n";
-    #}
+    }
 }
 
 __END__
@@ -166,8 +163,8 @@ url-opener.pl
 
 =head1 SYNOPSIS
 
-    carton install
-    carton exec -- perl url-opener.pl
+    $ carton install
+    $ carton exec -- perl url-opener.pl
 
 =head1 MEMO
 

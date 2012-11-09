@@ -22,6 +22,11 @@ __END__
 
 im.kayac.sample.pl - im.kayac.comの動作テスト用
 
+=head1 SYNOPSIS
+
+    $ carton install
+    $ carton exec -- perl im.kayac.sample.pl
+
 =head1 DESCRIPTION
 
 im.kayac.comを通してiPhoneに通知を送るサンプル

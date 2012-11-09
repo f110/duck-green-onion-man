@@ -93,7 +93,6 @@ sub timer_callback {
             );
             $req->content("message=Got new Message!");
             $req->content_type('application/x-www-form-urlencoded');
-            my $ua = LWP::UserAgent->new;
         }
         $ua->request($req);
     }
@@ -113,7 +112,7 @@ sub timer_callback {
         print $view_message_url."\n";
         $res = $mech->get($view_message_url);
         if ($auto_message_open) {
-            system qq#open -a $view_message_url#;
+            system qq#open $view_message_url#;
         }
 
         $tree = HTML::TreeBuilder::XPath->new_from_content($res->decoded_content);
@@ -148,7 +147,7 @@ sub timer_callback {
             print $_."\n";
             # 自動でURLを開くオプションがenableだった場合かつURLが5個以内だった場合は開く
             if ($auto_url_open and scalar @urls > 0 and scalar @urls <= 5) {
-                system qq#open -a $_#;
+                system qq#open $_#;
             }
         }
 

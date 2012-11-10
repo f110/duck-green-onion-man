@@ -6,3 +6,4 @@ requires 'List::Compare';
 requires 'LWP::UserAgent';
 requires 'LWP::Protocol::https';
 requires 'Date::Calc';
+requires 'URI';

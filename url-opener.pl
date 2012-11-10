@@ -33,7 +33,7 @@ GetOptions(
 
 my $conf = do $config_file or die;
 
-my $url = q#http://sc.mixi.jp:8300/#;
+my $url = q#http://mixi.jp/#;
 
 my $mech = WWW::Mechanize->new();
 my ($res, $tree);
@@ -91,30 +91,8 @@ sub timer_callback {
     }
 
     # push notification
-    if ($notify_to_phone) {
-        my $ua = LWP::UserAgent->new;
-        my $req;
-        if ($notify_to_phone eq "notifo") {
-            $req = HTTP::Request->new(POST => "https://api.notifo.com/v1/send_message");
+    send_notify() if $notify_to_phone;
 
-            $req->content("to=".$conf->{notifo_username}."&msg=Got new Message!");
-            $req->authorization_basic(
-                $conf->{notifo_username},
-                $conf->{notifo_apisecret}
-            );
-            $req->content_type('application/x-www-form-urlencoded');
-        } elsif ($notify_to_phone eq "kayac") {
-            $req = HTTP::Request->new(
-                POST => "http://im.kayac.com/api/post/".$conf->{im_kayac_username}
-            );
-            $req->content("message=Got new Message!");
-            $req->content_type('application/x-www-form-urlencoded');
-        }
-        $ua->request($req);
-    }
-    # end of notification section
-
-    # for debug
     foreach my $id (@Ronly) {
         my ($hour, $min, $sec) = Date::Calc::Now();
         say "--------------------";
@@ -169,6 +147,28 @@ sub timer_callback {
     }
 }
 
+sub send_notify {
+    my $ua = LWP::UserAgent->new;
+    my $req;
+    if ($notify_to_phone eq "notifo") {
+        $req = HTTP::Request->new(POST => "https://api.notifo.com/v1/send_message");
+
+        $req->content("to=".$conf->{notifo_username}."&msg=Got new Message!");
+        $req->authorization_basic(
+            $conf->{notifo_username},
+            $conf->{notifo_apisecret}
+        );
+        $req->content_type('application/x-www-form-urlencoded');
+    } elsif ($notify_to_phone eq "kayac") {
+        $req = HTTP::Request->new(
+            POST => "http://im.kayac.com/api/post/".$conf->{im_kayac_username}
+        );
+        $req->content("message=Got new Message!");
+        $req->content_type('application/x-www-form-urlencoded');
+    }
+    $ua->request($req);
+}
+
 __END__
 =pod
 
@@ -189,30 +189,27 @@ url-opener.pl
 
 =head1 OPTIONS
 
-引数は与えられません。
-フラグがハードコーディングされているのでプログラムを自分で修正してください。
-
 =over
 
-=item growl_notify
+=item growl
 
 新しいメッセージがあったらGrowl通知をします。
 
 growlnotifyコマンドがパスが通ったディレクトリにインストールされている必要があります。
 
-=item notify_to_phone
+=item notify
 
-通知をスマートフォンに送ります．growl_notifyのフラグとは関係ありません．
+通知をスマートフォンに送ります．growlフラグとは関係ありません．
 
 対応サービスはim.kayac.comとnotifoです．
 
 im.kayac.comを使う場合は以下のようにします．
 
-    $notify_to_phone = "kayac";
+    $ carton exec -- perl url-opener.pl --notify "kayac"
 
 notifoを使う場合は以下のようにします．
 
-    $notify_to_phone = "notifo";
+    $ carton exec -- perl url-opener.pl --notify "notifo"
 
 im.kayac.comはiPhoneのみ．notifoもstableではiPhoneのみですが，Androidアプリも存在し
 Androidへ通知を送る事も出来ます．
@@ -223,7 +220,19 @@ http://im.kayac.com/
 
 http://notifo.com/
 
+im.kayac.comの場合は登録したユーザー名をconfigファイルへ記述，
+notifoの場合はユーザー名とAPI Secretをconfigファイルへ書く必要があります．
+
+im.kayac.comは同時に複数のデバイスでSubscribeした場合は，後にログインした方のみに通知が飛びます．
+notifoは複数のデバイスでSubscribeした場合でもそれぞれのデバイスへ通知が飛びます．
+
+=item message_open
+
+自動で新着メッセージを開きます．自動でメッセージ内のURLを開くのが怖い人はこちらがオススメ．
+
 =item auto_url_open
+
+B<非常に危険なオプションなのでプログラム内にハードコーディングされています>
 
 メッセージ内にURLが含まれていた場合は自動で開きます．
 
@@ -232,14 +241,14 @@ http://notifo.com/
 system関数からopenコマンドを実行しています．
 標準のブラウザとして指定されているもので開きます．（特にアプリケーションの指定なし）
 
-=item auto_message_open
-
-自動で新着メッセージを開きます．自動でメッセージ内のURLを開くのが怖い人はこちらがオススメ．
-
 =back
+
+=head1 GOAL
+
+phantomjsと組み合わせ，自動採点
 
 =head1 AUTHOR
 
-Fumihiro Ito <fmhrit@gmail.com>
+Fumihiro Ito E<lt>fmhrit@gmail.comE<gt>
 
 =cut

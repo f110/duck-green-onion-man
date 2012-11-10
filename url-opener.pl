@@ -11,14 +11,18 @@ use HTTP::Request;
 use LWP::UserAgent;
 use Date::Calc qw//;
 use Getopt::Long qw/:config posix_default no_ignore_case gnu_compat/;
+use URI;
+use Carp;
 
 use Data::Dumper;
 
-my $debug = 0;
-my $growl_notify = 0;
-my $notify_to_phone = 0; # 0 or "kayac" or "notifo"
-my $auto_url_open = 0; # Denger!!
-my $auto_message_open = 0;
+my $url = q#http://mixi.jp/#;
+
+my $debug;
+my $growl_notify;
+my $notify_to_phone; # 0 or "kayac" or "notifo"
+my $auto_url_open; # Denger!!
+my $auto_message_open;
 my $interval = 15;
 my $config_file = "./config.pl";
 
@@ -33,12 +37,12 @@ GetOptions(
 
 my $conf = do $config_file or die;
 
-my $url = q#http://mixi.jp/#;
+my $uri_object = URI->new($url);
 
 my $mech = WWW::Mechanize->new();
 my ($res, $tree);
 
-$res = $mech->get($url."list_message.pl");
+$res = _mechanize_get($mech, $uri_object, "list_message.pl");
 # login
 $res = $mech->submit_form(
     form_number => 1,
@@ -66,7 +70,7 @@ $cv->recv;
 exit;
 
 sub timer_callback {
-    my $res = $mech->get($url."list_message.pl");
+    my $res = _mechanize_get($mech, $uri_object, "list_message.pl");
     unless ($res) {
         warn "Connection Lost!!";
         return;
@@ -101,12 +105,17 @@ sub timer_callback {
         say "--------------------";
         my @urls;
 
-        my $view_message_url = $url."view_message.pl?id=".$id."&box=inbox";
+        $uri_object->path("view_message.pl");
+        $uri_object->query_form({
+            id => $id,
+            box => "indox",
+        });
+        my $view_message_url = $$uri_object->as_string;
         say $view_message_url;
         if ($auto_message_open) {
             system qq#open "$view_message_url"#;
         }
-        $res = $mech->get($view_message_url);
+        $res = _mechanize_get($mech, $uri_object);
 
         $tree = HTML::TreeBuilder::XPath->new_from_content($res->decoded_content);
 
@@ -172,6 +181,16 @@ sub send_notify {
     $ua->request($req);
 }
 
+sub _mechanize_get {
+    my ($mech, $uri, $path, $query) = @_;
+
+    croak if not $uri->isa("URI");
+
+    $uri->path($path) if defined $path;
+    $uri->query_form($query) if defined $query;
+    return $mech->get($uri->as_string);
+}
+
 __END__
 =pod
 
@@ -179,12 +198,16 @@ __END__
 
 =head1 NAME
 
-url-opener.pl
+url-opener.pl - 監視スクリプト
 
 =head1 SYNOPSIS
 
     $ carton install
     $ carton exec -- perl url-opener.pl
+
+=head1 DESCRIPTION
+
+メッセージを監視して，新着メッセージがあったら通知したりする．
 
 =head1 MEMO
 

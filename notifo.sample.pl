@@ -3,14 +3,13 @@ use warnings;
 use LWP::UserAgent;
 use HTTP::Request;
 
-my $username = "";
-my $apisecret = '';
+my $config = do "config.pl" or die;
 
 my $req = HTTP::Request->new(POST => "https://api.notifo.com/v1/send_message");
-$req->content("to=".$username."&msg=Got new Message!");
+$req->content("to=".$config->{notifo_username}."&msg=Got new Message!");
 $req->authorization_basic(
-    $username,
-    $apisecret
+    $config->{notifo_username},
+    $config->{notifo_apisecret}
 );
 $req->content_type('application/x-www-form-urlencoded');
 my $ua = LWP::UserAgent->new;
@@ -33,6 +32,10 @@ notifo.sample.pl - notifoの動作テスト用
 =head1 DESCRIPTION
 
 notifoを通してiPhoneに通知を送るサンプル
+
+=head1 OPTIONS
+
+config.plに書かれたユーザー名等を使います
 
 =head1 AUTHOR
 

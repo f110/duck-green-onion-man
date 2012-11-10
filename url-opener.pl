@@ -110,11 +110,13 @@ sub timer_callback {
 
         $tree = HTML::TreeBuilder::XPath->new_from_content($res->decoded_content);
 
+        # メッセージ本文の取得
         my $message_body = $tree->findnodes(q{//div[@id='message_body']});
         foreach my $line ($message_body->pop->content_list) {
-            unless (defined $line and $line->isa("HTML::Element")) {
-                if ($line =~ m#$url/[a-z_]+\.pl\?[a-z0-9_=&]#) {
-                    push @urls, $&;
+            next unless defined $line;
+            if ($line->isa("HTML::Element") and $line->tag("a")) {
+                if ($line->attr("href") =~ m#$url#) {
+                    push @urls, $line->attr("href");
                 }
             }
 
@@ -144,6 +146,7 @@ sub timer_callback {
         }
 
         print "\n";
+        say "====================";
     }
 }
 

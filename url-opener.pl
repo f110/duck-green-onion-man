@@ -1,5 +1,6 @@
 use strict;
 use warnings;
+use 5.010;
 use WWW::Mechanize;
 use WWW::Mechanize::Plugin::FollowMetaRedirect;
 use HTML::TreeBuilder::XPath;
@@ -9,18 +10,30 @@ use Encode;
 use HTTP::Request;
 use LWP::UserAgent;
 use Date::Calc qw//;
+use Getopt::Long qw/:config posix_default no_ignore_case gnu_compat/;
 
 use Data::Dumper;
 
-my $debug = 1;
+my $debug = 0;
 my $growl_notify = 0;
 my $notify_to_phone = 0; # 0 or "kayac" or "notifo"
-my $auto_url_open = 0;
+my $auto_url_open = 0; # Denger!!
 my $auto_message_open = 0;
+my $interval = 15;
 my $config_file = "./config.pl";
+
+GetOptions(
+    debug => \$debug,
+    growl => \$growl_notify,
+    "notify=s" => \$notify_to_phone,
+    message_open => \$auto_message_open,
+    "interval=s" => \$interval,
+    "config=s" => \$config_file,
+);
+
 my $conf = do $config_file or die;
 
-my $url = q#http://mixi.jp/#;
+my $url = q#http://sc.mixi.jp:8300/#;
 
 my $mech = WWW::Mechanize->new();
 my ($res, $tree);
@@ -44,7 +57,7 @@ my @message_ids = map { $_ =~ m/id=([0-9a-f]{32})/; $1} @messages;
 warn "start timer";
 my $cv = AnyEvent->condvar;
 my $timer = AnyEvent->timer(
-    interval => 60,
+    interval => $interval,
     cb => \&timer_callback,
 );
 
@@ -54,10 +67,14 @@ exit;
 
 sub timer_callback {
     my $res = $mech->get($url."list_message.pl");
+    unless ($res) {
+        warn "Connection Lost!!";
+        return;
+    }
     my $tree = HTML::TreeBuilder::XPath->new_from_content($res->decoded_content);
 
     my @new_messages = $tree->findvalues(q{//td[@class='subject']/a/@href});
-    my @new_message_ids = map { $_ =~ m/id=([0-9a-f]{32})/; $1} @messages;
+    my @new_message_ids = map { $_ =~ m/id=([0-9a-f]{32})/; $1} @new_messages;
 
     my $lc = List::Compare->new(\@message_ids, \@new_message_ids);
 
@@ -100,25 +117,25 @@ sub timer_callback {
     # for debug
     foreach my $id (@Ronly) {
         my ($hour, $min, $sec) = Date::Calc::Now();
-        print "--------------------\n";
-        print "New Message!\n";
-        print $hour.":".$min.":".$sec."\n";
-        print "--------------------\n";
+        say "--------------------";
+        say "New Message!";
+        say $hour.":".$min.":".$sec;
+        say "--------------------";
         my @urls;
 
         my $view_message_url = $url."view_message.pl?id=".$id."&box=inbox";
-        print $view_message_url."\n";
-        $res = $mech->get($view_message_url);
+        say $view_message_url;
         if ($auto_message_open) {
-            system qq#open $view_message_url#;
+            system qq#open "$view_message_url"#;
         }
+        $res = $mech->get($view_message_url);
 
         $tree = HTML::TreeBuilder::XPath->new_from_content($res->decoded_content);
 
         my $message_body = $tree->findnodes(q{//div[@id='message_body']});
         foreach my $line ($message_body->pop->content_list) {
-            unless ($line->isa("HTML::Element")) {
-                if ($line =~ m#$url/[a-z_]+\.pl\?[a-z0-9_=]#) {
+            unless (defined $line and $line->isa("HTML::Element")) {
+                if ($line =~ m#$url/[a-z_]+\.pl\?[a-z0-9_=&]#) {
                     push @urls, $&;
                 }
             }
@@ -135,16 +152,16 @@ sub timer_callback {
         }
         my $sender = $tree->findnodes(q{//div[@class='messageDetailHead']/dl/dd});
         foreach my $line ($sender->pop->content_list) {
-            if ($line->isa("HTML::Element")) {
+            if ($debug and $line->isa("HTML::Element")) {
                 warn $line->tag;
             }
         }
 
         foreach (@urls) {
-            print $_."\n";
+            say $_;
             # 自動でURLを開くオプションがenableだった場合かつURLが5個以内だった場合は開く
             if ($auto_url_open and scalar @urls > 0 and scalar @urls <= 5) {
-                system qq#open $_#;
+                system qq#open "$_"#;
             }
         }
 

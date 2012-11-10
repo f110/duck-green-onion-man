@@ -24,6 +24,7 @@ my $notify_to_phone; # 0 or "kayac" or "notifo"
 my $auto_url_open; # Denger!!
 my $auto_message_open;
 my $interval = 15;
+my $use_local_hosts;
 my $config_file = "./config.pl";
 
 GetOptions(
@@ -33,6 +34,7 @@ GetOptions(
     message_open => \$auto_message_open,
     "interval=s" => \$interval,
     "config=s" => \$config_file,
+    hosts => \$use_local_hosts,
 );
 
 my $conf = do $config_file or die;
@@ -188,6 +190,10 @@ sub _mechanize_get {
 
     $uri->path($path) if defined $path;
     $uri->query_form($query) if defined $query;
+    if ($use_local_hosts) {
+        $mech->add_header("Host", $uri->host);
+        $uri->host($conf->{hosts}{$uri->host});
+    }
     return $mech->get($uri->as_string);
 }
 
@@ -255,6 +261,11 @@ notifoは複数のデバイスでSubscribeした場合でもそれぞれのデ�
 =item message_open
 
 自動で新着メッセージを開きます．自動でメッセージ内のURLを開くのが怖い人はこちらがオススメ．
+
+=item host
+
+configファイル内に書かれたドメインとIPの対応を使用します．
+管理者権限がなく，hostsファイルが書き換えられない場合でもアクセスする事が出来るようになります．
 
 =item auto_url_open
 

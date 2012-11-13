@@ -122,16 +122,16 @@ sub timer_callback {
         $tree = HTML::TreeBuilder::XPath->new_from_content($res->decoded_content);
 
         # メッセージ本文の取得
-        my $message_body = $tree->findnodes(q{//div[@id='message_body']});
-        foreach my $line ($message_body->pop->content_list) {
-            next unless defined $line;
-            if ($line->isa("HTML::Element") and $line->tag("a")) {
-                if ($line->attr("href") =~ m#$url#) {
-                    push @urls, $line->attr("href");
+        if ($debug) {
+            my $message_body = $tree->findnodes(q{//div[@id='message_body']});
+            foreach my $line ($message_body->pop->content_list) {
+                next unless defined $line;
+                if ($line->isa("HTML::Element") and $line->tag("a")) {
+                    if ($line->attr("href") =~ m#$url#) {
+                        push @urls, $line->attr("href");
+                    }
                 }
-            }
 
-            if ($debug) {
                 if ($line->isa("HTML::Element")) {
                     if ($line->tag eq "br") {
                         print "\n";
@@ -140,19 +140,19 @@ sub timer_callback {
                     print encode_utf8($line);
                 }
             }
-        }
-        my $sender = $tree->findnodes(q{//div[@class='messageDetailHead']/dl/dd});
-        foreach my $line ($sender->pop->content_list) {
-            if ($debug and $line->isa("HTML::Element")) {
-                warn $line->tag;
+            my $sender = $tree->findnodes(q{//div[@class='messageDetailHead']/dl/dd});
+            foreach my $line ($sender->pop->content_list) {
+                if ($debug and $line->isa("HTML::Element")) {
+                    warn $line->tag;
+                }
             }
-        }
 
-        foreach (@urls) {
-            say $_;
-            # 自動でURLを開くオプションがenableだった場合かつURLが5個以内だった場合は開く
-            if ($auto_url_open and scalar @urls > 0 and scalar @urls <= 5) {
-                system qq#open "$_"#;
+            foreach (@urls) {
+                say $_;
+                # 自動でURLを開くオプションがenableだった場合かつURLが5個以内だった場合は開く
+                if ($auto_url_open and scalar @urls > 0 and scalar @urls <= 5) {
+                    system qq#open "$_"#;
+                }
             }
         }
 

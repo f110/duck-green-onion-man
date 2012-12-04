@@ -211,6 +211,10 @@ url-opener.pl - 監視スクリプト
     $ carton install
     $ carton exec -- perl url-opener.pl
 
+おすすめ実行コマンド
+
+    $ carton exec -- perl url-opener.pl --notify=notifo --message_open
+
 =head1 DESCRIPTION
 
 メッセージを監視して，新着メッセージがあったら通知したりする．

@@ -13,6 +13,7 @@ use Date::Calc qw//;
 use Getopt::Long qw/:config posix_default no_ignore_case gnu_compat/;
 use URI;
 use Carp;
+use Proclet;
 
 use Data::Dumper;
 
@@ -60,21 +61,33 @@ $tree = HTML::TreeBuilder::XPath->new_from_content($res->decoded_content);
 my @messages = $tree->findvalues(q{//td[@class='subject']/a/@href});
 my @message_ids = map { $_ =~ m/id=([0-9a-f]{32})/; $1} @messages;
 
-warn "start timer";
 my $cv = AnyEvent->condvar;
-my $timer = AnyEvent->timer(
-    interval => $interval,
-    cb => \&timer_callback,
+
+# add watcher to supervisor
+my $proclet = Proclet->new(color => 1);
+
+$proclet->service(
+    code => sub {
+        warn "start timer";
+        my $timer = AnyEvent->timer(
+            interval => $interval,
+            cb => \&timer_callback,
+        );
+
+        warn $cv->recv;
+
+        die;
+    },
+    worker => 1,
+    tag => "Watcher",
 );
 
-$cv->recv;
-
-exit;
+$proclet->run;
 
 sub timer_callback {
     my $res = _mechanize_get($mech, $uri_object, "list_message.pl");
     unless ($res) {
-        warn "Connection Lost!!";
+        $cv->send("Connection Lost!!");
         return;
     }
     my $tree = HTML::TreeBuilder::XPath->new_from_content($res->decoded_content);
@@ -149,16 +162,16 @@ sub timer_callback {
                 }
             }
 
-            foreach (@urls) {
-                say $_;
-                # 自動でURLを開くオプションがenableだった場合かつURLが5個以内だった場合は開く
-                if (scalar @urls > 0 and scalar @urls <= 5) {
+            # URLが5個以内だった場合は開く
+            if (scalar @urls > 0 and scalar @urls <= 5) {
+                foreach (@urls) {
+                    say $_;
                     system qq#open "$_"#;
                 }
             }
         }
 
-        print "\n";
+        say "";
         say "====================";
     }
 }
@@ -188,7 +201,7 @@ sub send_notify {
 sub _mechanize_get {
     my ($mech, $uri, $path, $query) = @_;
 
-    croak if not $uri->isa("URI");
+    croak "_mechanize_get requires a URI object" if not $uri->isa("URI");
 
     $uri->path($path) if defined $path;
     $uri->query_form($query) if defined $query;

@@ -14,6 +14,7 @@ use Getopt::Long qw/:config posix_default no_ignore_case gnu_compat/;
 use URI;
 use Carp;
 use Proclet;
+use App::Onion::Parser;
 
 use Data::Dumper;
 
@@ -130,12 +131,12 @@ sub timer_callback {
         if ($auto_message_open) {
             system qq#open "$view_message_url"#;
         }
-        $res = _mechanize_get($mech, $uri_object);
-
-        $tree = HTML::TreeBuilder::XPath->new_from_content($res->decoded_content);
-
         # メッセージ本文の取得
         if ($auto_url_open) {
+            $res = _mechanize_get($mech, $uri_object);
+
+            $tree = HTML::TreeBuilder::XPath->new_from_content($res->decoded_content);
+
             my $message_body = $tree->findnodes(q{//div[@id='message_body']});
             foreach my $line ($message_body->pop->content_list) {
                 next unless defined $line;

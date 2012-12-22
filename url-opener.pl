@@ -1,6 +1,9 @@
 use strict;
 use warnings;
 use 5.010;
+use File::Spec;
+use File::Basename;
+use lib File::Spec->catdir(dirname(__FILE__), 'lib');
 use WWW::Mechanize;
 use WWW::Mechanize::Plugin::FollowMetaRedirect;
 use HTML::TreeBuilder::XPath;
@@ -60,7 +63,7 @@ $res = $mech->follow_meta_redirect;
 $tree = HTML::TreeBuilder::XPath->new_from_content($res->decoded_content);
 
 my @messages = $tree->findvalues(q{//td[@class='subject']/a/@href});
-my @message_ids = map { $_ =~ m/id=([0-9a-f]{32})/; $1} @messages;
+my @message_ids = map { $_ =~ m/id=([0-9a-f]{32})/; $1 } @messages;
 
 my $cv = AnyEvent->condvar;
 
@@ -131,10 +134,18 @@ sub timer_callback {
         if ($auto_message_open) {
             system qq#open "$view_message_url"#;
         }
+
+        $res = _mechanize_get($mech, $uri_object);
+        my ($sender_name, $sender_id) = get_sender($res->decoded_content);
+        if (defined $sender_name and defined $sender_id) {
+            say "From: $sender_name";
+            say "Sender ID: $sender_id";
+        } else {
+            warn "something wrong. unable to get sender name and id";
+        }
+
         # メッセージ本文の取得
         if ($auto_url_open) {
-            $res = _mechanize_get($mech, $uri_object);
-
             $tree = HTML::TreeBuilder::XPath->new_from_content($res->decoded_content);
 
             my $message_body = $tree->findnodes(q{//div[@id='message_body']});

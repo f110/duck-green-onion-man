@@ -7,6 +7,7 @@ use URI;
 
 our @EXPORT = qw/
     get_sender
+    get_message_ids
 /;
 
 sub get_sender($) {
@@ -22,6 +23,21 @@ sub get_sender($) {
     my %query = $profile_url->query_form;
 
     return ($sender_name, $query{id});
+}
+
+sub get_message_ids {
+    my $html = shift;
+    return unless $html;
+    my $tree = HTML::TreeBuilder::XPath->new_from_content($html);
+
+    my @messages = $tree->findvalues(q{//td[@class='subject']/a/@href});
+    my @message_ids = map {
+        my $uri = URI->new($_);
+        my %query = $uri->query_form;
+        $query{id};
+    } @messages;
+
+    return @message_ids;
 }
 
 1;

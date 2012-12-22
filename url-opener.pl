@@ -60,10 +60,7 @@ $res = $mech->submit_form(
 );
 $res = $mech->follow_meta_redirect;
 
-$tree = HTML::TreeBuilder::XPath->new_from_content($res->decoded_content);
-
-my @messages = $tree->findvalues(q{//td[@class='subject']/a/@href});
-my @message_ids = map { $_ =~ m/id=([0-9a-f]{32})/; $1 } @messages;
+my @message_ids = get_message_ids($res->decoded_content);
 
 my $cv = AnyEvent->condvar;
 

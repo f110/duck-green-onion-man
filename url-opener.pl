@@ -1,6 +1,9 @@
 use strict;
 use warnings;
 use 5.010;
+use File::Spec;
+use File::Basename;
+use lib File::Spec->catdir(dirname(__FILE__), 'lib');
 use WWW::Mechanize;
 use WWW::Mechanize::Plugin::FollowMetaRedirect;
 use HTML::TreeBuilder::XPath;
@@ -13,6 +16,8 @@ use Date::Calc qw//;
 use Getopt::Long qw/:config posix_default no_ignore_case gnu_compat/;
 use URI;
 use Carp;
+use Proclet;
+use App::Onion::Parser;
 
 use Data::Dumper;
 
@@ -55,26 +60,35 @@ $res = $mech->submit_form(
 );
 $res = $mech->follow_meta_redirect;
 
-$tree = HTML::TreeBuilder::XPath->new_from_content($res->decoded_content);
+my @message_ids = get_message_ids($res->decoded_content);
 
-my @messages = $tree->findvalues(q{//td[@class='subject']/a/@href});
-my @message_ids = map { $_ =~ m/id=([0-9a-f]{32})/; $1} @messages;
-
-warn "start timer";
 my $cv = AnyEvent->condvar;
-my $timer = AnyEvent->timer(
-    interval => $interval,
-    cb => \&timer_callback,
+
+# add watcher to supervisor
+my $proclet = Proclet->new(color => 1);
+
+$proclet->service(
+    code => sub {
+        warn "start timer";
+        my $timer = AnyEvent->timer(
+            interval => $interval,
+            cb => \&timer_callback,
+        );
+
+        warn $cv->recv;
+
+        die;
+    },
+    worker => 1,
+    tag => "Watcher",
 );
 
-$cv->recv;
-
-exit;
+$proclet->run;
 
 sub timer_callback {
     my $res = _mechanize_get($mech, $uri_object, "list_message.pl");
     unless ($res) {
-        warn "Connection Lost!!";
+        $cv->send("Connection Lost!!");
         return;
     }
     my $tree = HTML::TreeBuilder::XPath->new_from_content($res->decoded_content);
@@ -110,19 +124,27 @@ sub timer_callback {
         $uri_object->path("view_message.pl");
         $uri_object->query_form({
             id => $id,
-            box => "indox",
+            box => "inbox",
         });
-        my $view_message_url = $$uri_object->as_string;
+        my $view_message_url = $uri_object->as_string;
         say $view_message_url;
         if ($auto_message_open) {
             system qq#open "$view_message_url"#;
         }
-        $res = _mechanize_get($mech, $uri_object);
 
-        $tree = HTML::TreeBuilder::XPath->new_from_content($res->decoded_content);
+        $res = _mechanize_get($mech, $uri_object);
+        my ($sender_name, $sender_id) = get_sender($res->decoded_content);
+        if (defined $sender_name and defined $sender_id) {
+            say "From: $sender_name";
+            say "Sender ID: $sender_id";
+        } else {
+            warn "something wrong. unable to get sender name and id";
+        }
 
         # メッセージ本文の取得
-        if ($debug) {
+        if ($auto_url_open) {
+            $tree = HTML::TreeBuilder::XPath->new_from_content($res->decoded_content);
+
             my $message_body = $tree->findnodes(q{//div[@id='message_body']});
             foreach my $line ($message_body->pop->content_list) {
                 next unless defined $line;
@@ -132,12 +154,14 @@ sub timer_callback {
                     }
                 }
 
-                if ($line->isa("HTML::Element")) {
-                    if ($line->tag eq "br") {
-                        print "\n";
+                if ($debug) {
+                    if ($line->isa("HTML::Element")) {
+                        if ($line->tag eq "br") {
+                            print "\n";
+                        }
+                    } else {
+                        print encode_utf8($line);
                     }
-                } else {
-                    print encode_utf8($line);
                 }
             }
             my $sender = $tree->findnodes(q{//div[@class='messageDetailHead']/dl/dd});
@@ -147,16 +171,16 @@ sub timer_callback {
                 }
             }
 
-            foreach (@urls) {
-                say $_;
-                # 自動でURLを開くオプションがenableだった場合かつURLが5個以内だった場合は開く
-                if ($auto_url_open and scalar @urls > 0 and scalar @urls <= 5) {
+            # URLが5個以内だった場合は開く
+            if (scalar @urls > 0 and scalar @urls <= 5) {
+                foreach (@urls) {
+                    say $_;
                     system qq#open "$_"#;
                 }
             }
         }
 
-        print "\n";
+        say "";
         say "====================";
     }
 }
@@ -186,7 +210,7 @@ sub send_notify {
 sub _mechanize_get {
     my ($mech, $uri, $path, $query) = @_;
 
-    croak if not $uri->isa("URI");
+    croak "_mechanize_get requires a URI object" if not $uri->isa("URI");
 
     $uri->path($path) if defined $path;
     $uri->query_form($query) if defined $query;
@@ -210,6 +234,10 @@ url-opener.pl - 監視スクリプト
 
     $ carton install
     $ carton exec -- perl url-opener.pl
+
+おすすめ実行コマンド
+
+    $ carton exec -- perl url-opener.pl --notify=notifo --message_open
 
 =head1 DESCRIPTION
 

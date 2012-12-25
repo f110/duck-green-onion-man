@@ -1,2 +1,4 @@
 local/
 .carton
+message.db
+message_list.db

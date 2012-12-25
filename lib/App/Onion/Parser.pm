@@ -8,6 +8,8 @@ use URI;
 our @EXPORT = qw/
     get_sender
     get_message_ids
+    get_body
+    get_title
 /;
 
 sub get_sender($) {
@@ -38,6 +40,45 @@ sub get_message_ids {
     } @messages;
 
     return @message_ids;
+}
+
+sub get_body {
+    my $html = shift;
+    return unless $html;
+
+    my $tree = HTML::TreeBuilder::XPath->new_from_content($html);
+    my $body_node = $tree->findnodes(q{//div[@id="message_body"]})->[0];
+    return if not defined $body_node;
+    my $content_ref = $body_node->content_array_ref;
+
+    my $message_body;
+    foreach my $node (@$content_ref) {
+        if (ref $node eq "HTML::Element" and $node->tag eq "br") {
+            $message_body .= "\n";
+        } elsif (ref $node eq "HTML::Element" and $node->tag eq "a") {
+            $message_body .= $node->attr("href")."\n";
+        } else {
+            $message_body .= $node;
+        }
+    }
+
+    return $message_body;
+}
+
+sub get_title {
+    my $html = shift;
+    return unless $html;
+
+    my $tree = HTML::TreeBuilder::XPath->new_from_content($html);
+    my $title_node = $tree->findnodes(q{//div[@class="messageDetailHead"]})->[0];
+    return if not defined $title_node;
+    my $content_ref = $title_node->content_array_ref;
+
+    foreach my $node (@$content_ref) {
+        if (ref $node eq "HTML::Element" and $node->tag eq "h3") {
+            return $node->as_text;
+        }
+    }
 }
 
 1;

@@ -3,25 +3,25 @@ use warnings;
 use Test::More;
 
 BEGIN {
-    use_ok "App::Onion::Parser", qw/get_title/;
+    use_ok "App::Onion::Parser", qw/get_send_date/;
 }
 
 my $html = do { local $/; <DATA> };
-my $expected_message_title = "☆mixi Xmasへの招待☆";
+my $expected_message_send_date = "2012年12月10日 22時32分";
 
-subtest "get_title" => sub {
-    my $message_title = get_title($html);
-    is $message_title, $expected_message_title;
+subtest "get_send_date" => sub {
+    my $message_send_date = get_send_date($html);
+    is $message_send_date, $expected_message_send_date;
 };
 
-subtest "get_title but couldn't get html" => sub {
-    my $message_title = get_title("");
-    is $message_title, undef;
+subtest "get_send_date but couldn't get html" => sub {
+    my $message_send_date = get_send_date("");
+    is $message_send_date, undef;
 };
 
-subtest "get_title but get an other dom tree something like error page" => sub {
-    my $message_title = get_title("<html><body>error</body></html>");
-    is $message_title, undef;
+subtest "get_send_date but get an other dom tree something like error page" => sub {
+    my $message_send_date = get_send_date("<html><body>error</body></html>");
+    is $message_send_date, undef;
 };
 
 done_testing;

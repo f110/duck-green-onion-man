@@ -4,12 +4,14 @@ use warnings;
 use parent qw/Exporter/;
 use HTML::TreeBuilder::XPath;
 use URI;
+use Data::Dumper;
 
 our @EXPORT = qw/
     get_sender
     get_message_ids
     get_body
     get_title
+    get_send_date
 /;
 
 sub get_sender($) {
@@ -79,6 +81,16 @@ sub get_title {
             return $node->as_text;
         }
     }
+}
+
+sub get_send_date {
+    my $html = shift;
+    return unless $html;
+
+    my $tree = HTML::TreeBuilder::XPath->new_from_content($html);
+    my $date_node = $tree->findnodes(q{//div[@class="messageDetailHead"]/dl/dd})->[0];
+    return if not defined $date_node;
+    return $date_node->content_array_ref->[0];
 }
 
 1;

@@ -328,7 +328,7 @@ if (window != top) top.location.href = location.href;
 
 <div id="messageDetail">
 
-<div class="thumb"><a href="show_friend.pl?id=3822309"><img src="http://profile.img.mixi.jp/photo/member/1234567890.jpg" alt="doctor who" /></a></div>
+<div class="thumb"><a href="show_friend.pl?id=987654321"><img src="http://profile.img.mixi.jp/photo/member/1234567890.jpg" alt="doctor who" /></a></div>
 
 <div class="messageDetailHead">
 <h3>☆mixi Xmasへの招待☆</h3>
@@ -457,7 +457,7 @@ if (window != top) top.location.href = location.href;
     data-grant-rand="1"
     data-pid="1"
     data-iframe-id=""
-    data-xuid="eef73ca4e6b8c556bbfafb6cf570c47e1eb46f6e"
+    data-xuid=""
     data-observe-channels="comeback.focus"
     style="margin-left:auto; margin-right:auto; width:216px; height:72px;"
 >
@@ -478,7 +478,7 @@ if (window != top) top.location.href = location.href;
     data-grant-rand="1"
     data-pid="1"
     data-iframe-id=""
-    data-xuid="eef73ca4e6b8c556bbfafb6cf570c47e1eb46f6e"
+    data-xuid=""
     data-observe-channels="comeback.focus"
     style="margin-left:auto; margin-right:auto; width:216px; height:72px;"
 >
@@ -511,7 +511,7 @@ if (window != top) top.location.href = location.href;
 <ul class="helpList04">
 <li><a href="http://mixi.jp/help.pl">ヘルプトップ</a></li>
 <li><a href="http://mixi.jp/help.pl?mode=list&category=3">利用上の注意</a></li>
-<li><a id="JS_supportReportLink"  href="spam_message.pl?message_id=d6557b05fd0b85f4dd64432276000abe&box=inbox">規約違反の通報</a></li>
+<li><a id="JS_supportReportLink"  href="spam_message.pl?message_id=1234567890&box=inbox">規約違反の通報</a></li>
 
 
 </ul>
@@ -532,7 +532,7 @@ if (window != top) top.location.href = location.href;
     data-grant-rand="1"
     data-pid="1"
     data-iframe-id=""
-    data-xuid="eef73ca4e6b8c556bbfafb6cf570c47e1eb46f6e"
+    data-xuid=""
     data-observe-channels="comeback.focus"
     style="margin-left:auto; margin-right:auto; width:224px; height:224px;"
 >
@@ -584,7 +584,7 @@ if (window != top) top.location.href = location.href;
     data-grant-rand="1"
     data-pid="1"
     data-iframe-id=""
-    data-xuid="eef73ca4e6b8c556bbfafb6cf570c47e1eb46f6e"
+    data-xuid=""
     data-observe-channels="comeback.focus"
     style="margin-left:auto; margin-right:auto; width:728px; height:90px;"
 >

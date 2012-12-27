@@ -86,7 +86,7 @@ __DATA__
     data-grant-rand="1"
     data-pid="2"
     data-iframe-id=""
-    data-xuid="eef73ca4e6b8c556bbfafb6cf570c47e1eb46f6e"
+    data-xuid=""
     data-observe-channels="comeback.focus"
     style="margin-left:auto; margin-right:auto; width:468px; height:60px;"
 >
@@ -463,7 +463,7 @@ if (window != top) top.location.href = location.href;
     data-enable-seg="0"
     data-grant-rand="1"
     data-pid="2"
-    data-xuid="eef73ca4e6b8c556bbfafb6cf570c47e1eb46f6e"
+    data-xuid=""
     data-observe-channels="comeback.focus"
 >
 
@@ -491,7 +491,7 @@ if (window != top) top.location.href = location.href;
     data-grant-rand="1"
     data-pid="1"
     data-iframe-id=""
-    data-xuid="eef73ca4e6b8c556bbfafb6cf570c47e1eb46f6e"
+    data-xuid=""
     data-observe-channels="comeback.focus"
     style="margin-left:auto; margin-right:auto; width:216px; height:72px;"
 >
@@ -512,7 +512,7 @@ if (window != top) top.location.href = location.href;
     data-grant-rand="1"
     data-pid="1"
     data-iframe-id=""
-    data-xuid="eef73ca4e6b8c556bbfafb6cf570c47e1eb46f6e"
+    data-xuid=""
     data-observe-channels="comeback.focus"
     style="margin-left:auto; margin-right:auto; width:216px; height:72px;"
 >
@@ -566,7 +566,7 @@ if (window != top) top.location.href = location.href;
     data-grant-rand="1"
     data-pid="1"
     data-iframe-id=""
-    data-xuid="eef73ca4e6b8c556bbfafb6cf570c47e1eb46f6e"
+    data-xuid=""
     data-observe-channels="comeback.focus"
     style="margin-left:auto; margin-right:auto; width:224px; height:224px;"
 >
@@ -599,7 +599,7 @@ if (window != top) top.location.href = location.href;
     data-grant-rand="1"
     data-pid="1"
     data-iframe-id=""
-    data-xuid="eef73ca4e6b8c556bbfafb6cf570c47e1eb46f6e"
+    data-xuid=""
     data-observe-channels="comeback.focus"
     style="margin-left:auto; margin-right:auto; width:728px; height:90px;"
 >

@@ -10,12 +10,12 @@ has furl => (
 has access_token => (
     is => 'ro',
     isa => 'Str',
-    requred => 1,
+    required => 1,
 );
 has token_type => (
     is => 'ro',
     isa => 'Str',
-    requred => 1,
+    required => 1,
 );
 
 __PACKAGE__->meta->make_immutable;

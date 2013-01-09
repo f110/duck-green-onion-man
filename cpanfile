@@ -8,3 +8,5 @@ requires 'LWP::Protocol::https';
 requires 'Date::Calc';
 requires 'URI';
 requires 'Proclet';
+requires 'Mouse';
+requires 'Furl';

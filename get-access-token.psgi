@@ -8,6 +8,7 @@ use File::Basename;
 use OAuth::Lite2::Client::WebServer;
 use IO::File;
 use IO::Handle;
+use Data::Dumper;
 
 my $config_file = dirname(__FILE__)."/config.pl";
 

@@ -25,6 +25,7 @@ use Net::Google::Spreadsheets::Request;
 use Net::Google::Spreadsheets::Spreadsheet;
 use Net::Google::Spreadsheets::Worksheet;
 use Net::Google::Spreadsheets::Row;
+use Net::Google::Spreadsheets::Cell;
 
 my $END_POINT = 'https://spreadsheets.google.com/feeds';
 
@@ -104,7 +105,7 @@ sub get_worksheets {
 sub get_rows {
     my $self = shift;
     my $worksheet = shift;
-    my @NODE_NAME = qw(id title content);
+    my @NODE_NAME = qw(id title content updated);
 
     die unless ref $worksheet eq "Net::Google::Spreadsheets::Worksheet";
 
@@ -121,9 +122,14 @@ sub get_rows {
 
     my @row_objects;
     foreach my $row (@rows) {
-        my $attributes = {};
+        my $attributes = {
+            values => {},
+        };
         foreach my $child ($row->getChildNodes) {
             my $value_node = $child->getChildNodes->[0] or next;
+            if ($child->getName =~ m/^gsx:(.+)/) {
+                $attributes->{values}->{$1} = $value_node->getValue;
+            }
 
             $attributes->{$child->getName} = $value_node->getValue
                 if List::MoreUtils::any {$_ eq $child->getName} @NODE_NAME;
@@ -131,11 +137,159 @@ sub get_rows {
 
         $attributes->{id} = pop @{[ split "/", $attributes->{id} ]};
         $attributes->{worksheet} = $worksheet,
+        $attributes->{entry} = $row;
 
         push @row_objects, Net::Google::Spreadsheets::Row->new(%$attributes);
     }
 
     return @row_objects;
+}
+
+sub get_row {
+    my $self = shift;
+    my $row = shift;
+    my @NODE_NAME = qw(title content updated);
+
+    die unless ref $row eq "Net::Google::Spreadsheets::Row";
+
+    my $content = $self->request->get(
+        sprintf("%s/list/%s/%s/private/full/%s",
+            $END_POINT,
+            $row->worksheet->spreadsheet->id,
+            $row->worksheet->id,
+            $row->id
+        )
+    )->body;
+
+    my @rows = $self->_get_nodes(
+        "//entry",
+        $content,
+    );
+    $row->xml_string($content);
+
+    foreach my $child ($rows[0]->getChildNodes) {
+        my $value_node = $child->getChildNodes->[0] or next;
+        if ($child->getName =~ m/^gsx:(.+)/) {
+            $row->values->{$1} = $value_node->getValue;
+        }
+
+        $row->{$child->getName} = $value_node->getValue
+            if List::MoreUtils::any {$_ eq $child->getName} @NODE_NAME;
+    }
+
+    return $row;
+}
+
+sub update {
+    my $self = shift;
+    my $entry = shift;
+
+    die unless $entry->does("Net::Google::Spreadsheets::Entry");
+
+    my $response = $self->request->put(
+        $entry->edit_url,
+        [
+            "Content-Type" => "application/atom+xml",
+            "If-Match" => $entry->etag,
+        ],
+        $entry->xml_string,
+    );
+
+    unless ($response->is_success) {
+        die "could not update row: ".$response->body;
+    }
+}
+
+sub get_cells {
+    my $self = shift;
+    my $worksheet = shift;
+    my @NODE_NAME = qw(id title content updated);
+
+    die unless ref $worksheet eq "Net::Google::Spreadsheets::Worksheet";
+
+    my @cells = $self->_get_nodes(
+        "//entry",
+        $self->request->get(
+            sprintf("%s/cells/%s/%s/private/full",
+                $END_POINT,
+                $worksheet->spreadsheet->id,
+                $worksheet->id,
+            )
+        )->body,
+    );
+
+    my @cell_objects;
+    foreach my $cell (@cells) {
+        my $attributes = {};
+        foreach my $child ($cell->getChildNodes) {
+            my $value_node = $child->getChildNodes->[0] or next;
+
+            $attributes->{$child->getName} = $value_node->getValue
+                if List::MoreUtils::any {$_ eq $child->getName} @NODE_NAME;
+
+            if ($child->getName eq "gs:cell") {
+                $attributes->{col} = $child->getAttribute("col");
+                $attributes->{row} = $child->getAttribute("row");
+            }
+        }
+
+        $attributes->{id} = pop @{[ split "/", $attributes->{id} ]};
+        $attributes->{position} = $attributes->{title};
+        delete $attributes->{title};
+        $attributes->{value} = $attributes->{content};
+        delete $attributes->{content};
+        $attributes->{worksheet} = $worksheet,
+
+        push @cell_objects, Net::Google::Spreadsheets::Cell->new(%$attributes);
+    }
+
+    return @cell_objects;
+}
+
+sub get_cell {
+    my $self = shift;
+    my $cell = shift;
+    my @NODE_NAME = qw(title content updated);
+
+    die unless ref $cell eq "Net::Google::Spreadsheets::Cell";
+
+    my $content = $self->request->get(
+        sprintf("%s/cells/%s/%s/private/full/%s",
+            $END_POINT,
+            $cell->worksheet->spreadsheet->id,
+            $cell->worksheet->id,
+            $cell->id,
+        )
+    )->body;
+    my @cells = $self->_get_nodes(
+        "//entry",
+        $content,
+    );
+    $cell->xml_string($content);
+
+    my $attributes = {};
+    foreach my $child ($cells[0]->getChildNodes) {
+        my $value_node = $child->getChildNodes->[0] or next;
+
+        $attributes->{$child->getName} = $value_node->getValue
+            if List::MoreUtils::any {$_ eq $child->getName} @NODE_NAME;
+
+        if ($child->getName eq "gs:cell") {
+            $attributes->{col} = $child->getAttribute("col");
+            $attributes->{row} = $child->getAttribute("row");
+        }
+    }
+
+    $attributes->{position} = $attributes->{title};
+    delete $attributes->{title};
+    $attributes->{value} = $attributes->{content};
+    delete $attributes->{content};
+
+    while (my ($key, $value) = each %$attributes) {
+        $cell->$key($value);
+    }
+
+    return $cell;
 }
 
 sub _get_nodes {

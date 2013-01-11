@@ -1,14 +1,14 @@
-package Net::Google::Spreadsheets::Row;
+package Net::Google::Spreadsheets::Cell;
 use Mouse;
 
 with 'Net::Google::Spreadsheets::Entry';
 
-has title => (
+has position => (
     is => 'rw',
     isa => 'Str',
     default => "",
 );
-has content => (
+has value => (
     is => 'rw',
     isa => 'Str',
     default => "",
@@ -18,27 +18,31 @@ has updated => (
     isa => 'Str',
     default => "",
 );
-has values => (
+has col => (
     is => 'rw',
-    isa => 'HashRef',
-    default => sub { +{} },
+    isa => 'Int',
+    default => 0,
+);
+has row => (
+    is => 'rw',
+    isa => 'Int',
+    default => 0,
 );
 
 __PACKAGE__->meta->make_immutable;
 no Mouse;
 
-use Encode;
 use XML::XPath;
+use Encode;
 
 sub set_value {
     my $self = shift;
-    my $key = shift;
     my $value = shift;
 
     my $xml = XML::XPath->new(xml => $self->xml_string);
-    $xml->setNodeText(sprintf("//entry/gsx:%s", $key), $value);
-    $self->values->{$key} = $value if exists $self->values->{$key};
+    $xml->setNodeText(q{//entry/gs:cell/@inputValue}, $value);
     $self->xml_string(encode_utf8($xml->findnodes_as_string("//entry")));
+    warn $self->xml_string;
 }
 
 1;
@@ -49,7 +53,7 @@ __END__
 
 =head1 NAME
 
-Net::Google::Spreadsheets::Row -
+Net::Google::Spreadsheets::Cell -
 
 =head1 SYNOPSIS
 

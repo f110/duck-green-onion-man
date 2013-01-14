@@ -4,7 +4,6 @@ use Mouse::Role;
 has id => (
     is => 'ro',
     isa => 'Str',
-    required => 1,
 );
 has worksheet => (
     is => 'ro',
@@ -30,6 +29,10 @@ has etag => (
 requires 'set_value';
 
 no Mouse::Role;
+
+use constant BASE_XML => qq{<entry xmlns="http://www.w3.org/2005/Atom" xmlns:gs="http://schemas.google.com/spreadsheets/2006">
+<id></id>
+</entry>};
 
 sub _build_edit_url {
     my $self = shift;

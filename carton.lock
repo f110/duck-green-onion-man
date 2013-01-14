@@ -9518,6 +9518,150 @@
          "target" : "WWW::RobotRules",
          "version" : "6.02"
       },
+      "XML::DOM" : {
+         "dist" : "XML-DOM-1.44",
+         "mymeta" : {
+            "abstract" : "unknown",
+            "author" : [
+               "unknown"
+            ],
+            "dynamic_config" : 0,
+            "generated_by" : "ExtUtils::MakeMaker version 6.6302, CPAN::Meta::Converter version 2.120921",
+            "license" : [
+               "unknown"
+            ],
+            "meta-spec" : {
+               "url" : "http://search.cpan.org/perldoc?CPAN::Meta::Spec",
+               "version" : "2"
+            },
+            "name" : "XML-DOM",
+            "no_index" : {
+               "directory" : [
+                  "t",
+                  "inc"
+               ]
+            },
+            "prereqs" : {
+               "build" : {
+                  "requires" : {
+                     "ExtUtils::MakeMaker" : "0"
+                  }
+               },
+               "configure" : {
+                  "requires" : {
+                     "ExtUtils::MakeMaker" : "0"
+                  }
+               },
+               "runtime" : {
+                  "requires" : {
+                     "LWP::UserAgent" : "0",
+                     "XML::Parser" : "2.30",
+                     "XML::Parser::PerlSAX" : "0.07",
+                     "XML::RegExp" : "0"
+                  }
+               }
+            },
+            "release_status" : "stable",
+            "version" : "1.44"
+         },
+         "name" : "XML::DOM",
+         "pathname" : "T/TJ/TJMATHER/XML-DOM-1.44.tar.gz",
+         "provides" : {
+            "XML::DOM" : {
+               "file" : "XML/DOM.pm",
+               "version" : "1.44"
+            },
+            "XML::DOM::AttDef" : {
+               "file" : "XML/DOM.pm"
+            },
+            "XML::DOM::AttlistDecl" : {
+               "file" : "XML/DOM.pm"
+            },
+            "XML::DOM::Attr" : {
+               "file" : "XML/DOM.pm"
+            },
+            "XML::DOM::CDATASection" : {
+               "file" : "XML/DOM.pm"
+            },
+            "XML::DOM::CharacterData" : {
+               "file" : "XML/DOM.pm"
+            },
+            "XML::DOM::Comment" : {
+               "file" : "XML/DOM.pm"
+            },
+            "XML::DOM::DOMException" : {
+               "file" : "XML/DOM/DOMException.pm"
+            },
+            "XML::DOM::DOMImplementation" : {
+               "file" : "XML/DOM.pm"
+            },
+            "XML::DOM::Document" : {
+               "file" : "XML/DOM.pm"
+            },
+            "XML::DOM::DocumentFragment" : {
+               "file" : "XML/DOM.pm"
+            },
+            "XML::DOM::DocumentType" : {
+               "file" : "XML/DOM.pm"
+            },
+            "XML::DOM::Element" : {
+               "file" : "XML/DOM.pm"
+            },
+            "XML::DOM::ElementDecl" : {
+               "file" : "XML/DOM.pm"
+            },
+            "XML::DOM::Entity" : {
+               "file" : "XML/DOM.pm"
+            },
+            "XML::DOM::EntityReference" : {
+               "file" : "XML/DOM.pm"
+            },
+            "XML::DOM::NamedNodeMap" : {
+               "file" : "XML/DOM/NamedNodeMap.pm"
+            },
+            "XML::DOM::Node" : {
+               "file" : "XML/DOM.pm"
+            },
+            "XML::DOM::NodeList" : {
+               "file" : "XML/DOM/NodeList.pm"
+            },
+            "XML::DOM::Notation" : {
+               "file" : "XML/DOM.pm"
+            },
+            "XML::DOM::Parser" : {
+               "file" : "XML/DOM.pm"
+            },
+            "XML::DOM::PerlSAX" : {
+               "file" : "XML/DOM/PerlSAX.pm"
+            },
+            "XML::DOM::PrintToFileHandle" : {
+               "file" : "XML/DOM.pm"
+            },
+            "XML::DOM::PrintToString" : {
+               "file" : "XML/DOM.pm"
+            },
+            "XML::DOM::ProcessingInstruction" : {
+               "file" : "XML/DOM.pm"
+            },
+            "XML::DOM::Text" : {
+               "file" : "XML/DOM.pm"
+            },
+            "XML::DOM::XMLDecl" : {
+               "file" : "XML/DOM.pm"
+            },
+            "XML::Handler::BuildDOM" : {
+               "file" : "XML/Handler/BuildDOM.pm"
+            },
+            "XML::Parser::Dom" : {
+               "file" : "XML/DOM.pm"
+            },
+            "XML::XQL::Node" : {
+               "file" : "XML/DOM.pm"
+            }
+         },
+         "target" : "XML::DOM",
+         "version" : "1.44"
+      },
       "XML::LibXML" : {
          "dist" : "XML-LibXML-2.0014",
          "mymeta" : {
@@ -9859,6 +10003,58 @@
          },
          "target" : "XML::Parser",
          "version" : "2.41"
+      },
+      "XML::RegExp" : {
+         "dist" : "XML-RegExp-0.04",
+         "mymeta" : {
+            "abstract" : "unknown",
+            "author" : [
+               "unknown"
+            ],
+            "dynamic_config" : 0,
+            "generated_by" : "ExtUtils::MakeMaker version 6.56, CPAN::Meta::Converter version 2.120921",
+            "license" : [
+               "unknown"
+            ],
+            "meta-spec" : {
+               "url" : "http://search.cpan.org/perldoc?CPAN::Meta::Spec",
+               "version" : "2"
+            },
+            "name" : "XML-RegExp",
+            "no_index" : {
+               "directory" : [
+                  "t",
+                  "inc"
+               ]
+            },
+            "prereqs" : {
+               "build" : {
+                  "requires" : {
+                     "ExtUtils::MakeMaker" : "0"
+                  }
+               },
+               "configure" : {
+                  "requires" : {
+                     "ExtUtils::MakeMaker" : "0"
+                  }
+               },
+               "runtime" : {
+                  "requires" : {}
+               }
+            },
+            "release_status" : "stable",
+            "version" : "0.04"
+         },
+         "name" : "XML::RegExp",
+         "pathname" : "T/TJ/TJMATHER/XML-RegExp-0.04.tar.gz",
+         "provides" : {
+            "XML::RegExp" : {
+               "file" : "XML/RegExp.pm",
+               "version" : "0.04"
+            }
+         },
+         "target" : "XML::RegExp",
+         "version" : "0.04"
       },
       "XML::SAX" : {
          "dist" : "XML-SAX-0.99",
@@ -10398,6 +10594,124 @@
          },
          "target" : "YAML::XS",
          "version" : "0.18"
+      },
+      "libxml::perl" : {
+         "dist" : "libxml-perl-0.08",
+         "mymeta" : {
+            "abstract" : "unknown",
+            "author" : [
+               "unknown"
+            ],
+            "dynamic_config" : 0,
+            "generated_by" : "ExtUtils::MakeMaker version 6.6302, CPAN::Meta::Converter version 2.120921",
+            "license" : [
+               "unknown"
+            ],
+            "meta-spec" : {
+               "url" : "http://search.cpan.org/perldoc?CPAN::Meta::Spec",
+               "version" : "2"
+            },
+            "name" : "libxml-perl",
+            "no_index" : {
+               "directory" : [
+                  "t",
+                  "inc"
+               ]
+            },
+            "prereqs" : {
+               "build" : {
+                  "requires" : {
+                     "ExtUtils::MakeMaker" : "0"
+                  }
+               },
+               "configure" : {
+                  "requires" : {
+                     "ExtUtils::MakeMaker" : "0"
+                  }
+               },
+               "runtime" : {
+                  "requires" : {
+                     "XML::Parser" : "2.19"
+                  }
+               }
+            },
+            "release_status" : "stable",
+            "version" : "0.08"
+         },
+         "name" : "libxml::perl",
+         "pathname" : "K/KM/KMACLEOD/libxml-perl-0.08.tar.gz",
+         "provides" : {
+            "Data::Grove" : {
+               "file" : "Data/Grove.pm",
+               "version" : "0.08"
+            },
+            "Data::Grove::Characters" : {
+               "file" : "Data/Grove.pm"
+            },
+            "Data::Grove::Parent" : {
+               "file" : "Data/Grove/Parent.pm",
+               "version" : "0.08"
+            },
+            "Data::Grove::ParentList" : {
+               "file" : "Data/Grove/Parent.pm"
+            },
+            "Data::Grove::Visitor" : {
+               "file" : "Data/Grove/Visitor.pm",
+               "version" : "0.08"
+            },
+            "XML::ESISParser" : {
+               "file" : "XML/ESISParser.pm",
+               "version" : "0.08"
+            },
+            "XML::Handler::CanonXMLWriter" : {
+               "file" : "XML/Handler/CanonXMLWriter.pm",
+               "version" : "0.08"
+            },
+            "XML::Handler::Sample" : {
+               "file" : "XML/Handler/Sample.pm"
+            },
+            "XML::Handler::Subs" : {
+               "file" : "XML/Handler/Subs.pm",
+               "version" : "0.08"
+            },
+            "XML::Handler::XMLWriter" : {
+               "file" : "XML/Handler/XMLWriter.pm",
+               "version" : "0.08"
+            },
+            "XML::Parser::PerlSAX" : {
+               "file" : "XML/Parser/PerlSAX.pm",
+               "version" : "0.08"
+            },
+            "XML::PatAct::ACTION" : {
+               "file" : "XML/PatAct/ActionTempl.pm"
+            },
+            "XML::PatAct::Amsterdam" : {
+               "file" : "XML/PatAct/Amsterdam.pm",
+               "version" : "0.08"
+            },
+            "XML::PatAct::MatchName" : {
+               "file" : "XML/PatAct/MatchName.pm",
+               "version" : "0.08"
+            },
+            "XML::PatAct::PATTERN" : {
+               "file" : "XML/PatAct/PatternTempl.pm"
+            },
+            "XML::PatAct::ToObjects" : {
+               "file" : "XML/PatAct/ToObjects.pm",
+               "version" : "0.08"
+            },
+            "XML::Perl2SAX" : {
+               "file" : "XML/Perl2SAX.pm",
+               "version" : "0.08"
+            },
+            "XML::SAX2Perl" : {
+               "file" : "XML/SAX2Perl.pm",
+               "version" : "0.08"
+            },
+            "libxml::perl" : {}
+         },
+         "target" : "XML::Parser::PerlSAX",
+         "version" : "0.08"
       }
    },
    "version" : "0.9"

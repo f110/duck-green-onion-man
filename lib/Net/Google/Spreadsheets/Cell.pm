@@ -3,6 +3,10 @@ use Mouse;
 
 with 'Net::Google::Spreadsheets::Entry';
 
+has "+id" => (
+    lazy => 1,
+    builder => '_build_id',
+);
 has position => (
     is => 'rw',
     isa => 'Str',
@@ -21,18 +25,19 @@ has updated => (
 has col => (
     is => 'rw',
     isa => 'Int',
-    default => 0,
+    required => 1,
 );
 has row => (
     is => 'rw',
     isa => 'Int',
-    default => 0,
+    required => 1,
 );
 
 __PACKAGE__->meta->make_immutable;
 no Mouse;
 
 use XML::XPath;
+use XML::DOM;
 use Encode;
 
 sub set_value {
@@ -42,7 +47,35 @@ sub set_value {
     my $xml = XML::XPath->new(xml => $self->xml_string);
     $xml->setNodeText(q{//entry/gs:cell/@inputValue}, $value);
     $self->xml_string(encode_utf8($xml->findnodes_as_string("//entry")));
-    warn $self->xml_string;
+}
+
+sub to_string {
+    my $self = shift;
+
+    my $parser = XML::DOM::Parser->new();
+    my $dom = $parser->parse(BASE_XML());
+    $dom->getElementsByTagName("id")->item(0)->appendChild(
+        $dom->createTextNode(
+            sprintf('https://spreadsheets.google.com/feeds/cells/%s/%s/private/full/%s',
+                $self->worksheet->spreadsheet->id,
+                $self->worksheet->id,
+                $self->id,
+            )
+        )
+    );
+    my $cell = $dom->createElement('gs:cell');
+    $cell->setAttribute(row => $self->row);
+    $cell->setAttribute(col => $self->col);
+    $cell->setAttribute(inputValue => $self->value);
+    $dom->getDocumentElement->appendChild($cell);
+
+    return $dom->toString;
+}
+
+sub _build_id {
+    my $self = shift;
+
+    return sprintf("R%dC%d", $self->row, $self->col);
 }
 
 1;

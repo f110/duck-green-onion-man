@@ -109,15 +109,17 @@ sub get_rows {
 
     die unless ref $worksheet eq "Net::Google::Spreadsheets::Worksheet";
 
+    my $content = $self->request->get(
+        sprintf("%s/list/%s/%s/private/full",
+            $END_POINT,
+            $worksheet->spreadsheet->id,
+            $worksheet->id,
+        )
+    );
+    die $content->message unless $content->code == 200;
     my @rows = $self->_get_nodes(
         "//entry",
-        $self->request->get(
-            sprintf("%s/list/%s/%s/private/full",
-                $END_POINT,
-                $worksheet->spreadsheet->id,
-                $worksheet->id,
-            )
-        )->body,
+        $content->body,
     );
 
     my @row_objects;
@@ -137,7 +139,7 @@ sub get_rows {
 
         $attributes->{id} = pop @{[ split "/", $attributes->{id} ]};
         $attributes->{worksheet} = $worksheet,
-        $attributes->{entry} = $row;
+        $attributes->{xml_string} = $row->toString;
 
         push @row_objects, Net::Google::Spreadsheets::Row->new(%$attributes);
     }
@@ -195,6 +197,7 @@ sub update {
         $entry->xml_string,
     );
 
+    warn Data::Dumper::Dumper $response;
     unless ($response->is_success) {
         die "could not update row: ".$response->body;
     }
@@ -207,15 +210,17 @@ sub get_cells {
 
     die unless ref $worksheet eq "Net::Google::Spreadsheets::Worksheet";
 
+    my $content = $self->request->get(
+        sprintf("%s/cells/%s/%s/private/full",
+            $END_POINT,
+            $worksheet->spreadsheet->id,
+            $worksheet->id,
+        )
+    );
+    die $content->message unless $content->code == 200;
     my @cells = $self->_get_nodes(
         "//entry",
-        $self->request->get(
-            sprintf("%s/cells/%s/%s/private/full",
-                $END_POINT,
-                $worksheet->spreadsheet->id,
-                $worksheet->id,
-            )
-        )->body,
+        $content->body,
     );
 
     my @cell_objects;
@@ -233,7 +238,6 @@ sub get_cells {
             }
         }
 
-        $attributes->{id} = pop @{[ split "/", $attributes->{id} ]};
         $attributes->{position} = $attributes->{title};
         delete $attributes->{title};
         $attributes->{value} = $attributes->{content};

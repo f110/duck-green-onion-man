@@ -119,64 +119,38 @@ sub timer_callback {
         say "New Message!";
         say $hour.":".$min.":".$sec;
         say "--------------------";
-        my @urls;
 
         $uri_object->path("view_message.pl");
         $uri_object->query_form({
             id => $id,
             box => "inbox",
         });
-        my $view_message_url = $uri_object->as_string;
-        say $view_message_url;
         if ($auto_message_open) {
+            my $view_message_url = $uri_object->as_string;
+            say $view_message_url;
             system qq#open "$view_message_url"#;
         }
 
-        $res = _mechanize_get($mech, $uri_object);
-        my ($sender_name, $sender_id) = get_sender($res->decoded_content);
-        if (defined $sender_name and defined $sender_id) {
-            say "From: $sender_name";
-            say "Sender ID: $sender_id";
-        } else {
-            warn "something wrong. unable to get sender name and id";
-        }
+        {
+            $res = _mechanize_get($mech, $uri_object);
+            my $decoded_content = $res->decoded_content;
+            my ($sender_name, $sender_id) = get_sender($decoded_content);
+            my $message_send_date = get_send_date($decoded_content);
+            my $message_title = get_title($decoded_content);
+            my $message_body = get_body($decoded_content);
+            if (defined $sender_name and defined $sender_id) {
+                say "From: $sender_name";
+                say "Sender ID: $sender_id";
+                say "Title: $message_title";
+                say "Body: $message_body";
 
-        # メッセージ本文の取得
-        if ($auto_url_open) {
-            $tree = HTML::TreeBuilder::XPath->new_from_content($res->decoded_content);
-
-            my $message_body = $tree->findnodes(q{//div[@id='message_body']});
-            foreach my $line ($message_body->pop->content_list) {
-                next unless defined $line;
-                if ($line->isa("HTML::Element") and $line->tag("a")) {
-                    if ($line->attr("href") =~ m#$url#) {
-                        push @urls, $line->attr("href");
-                    }
-                }
-
-                if ($debug) {
-                    if ($line->isa("HTML::Element")) {
-                        if ($line->tag eq "br") {
-                            print "\n";
-                        }
-                    } else {
-                        print encode_utf8($line);
-                    }
-                }
-            }
-            my $sender = $tree->findnodes(q{//div[@class='messageDetailHead']/dl/dd});
-            foreach my $line ($sender->pop->content_list) {
-                if ($debug and $line->isa("HTML::Element")) {
-                    warn $line->tag;
-                }
-            }
-
-            # URLが5個以内だった場合は開く
-            if (scalar @urls > 0 and scalar @urls <= 5) {
-                foreach (@urls) {
-                    say $_;
-                    system qq#open "$_"#;
-                }
+                $messages_detail->{$id}->{sender} = $sender_id;
+                $messages_detail->{$id}->{sender_name} = $sender_id;
+                $messages_detail->{$id}->{send_date} = $message_send_date;
+                $messages_detail->{$id}->{title} = $message_title;
+                $messages_detail->{$id}->{body} = $message_body;
+            } else {
+                warn "something wrong. unable to get sender name and id";
             }
         }
 

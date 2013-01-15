@@ -29,6 +29,42 @@ use Net::Google::Spreadsheets::Cell;
 
 my $END_POINT = 'https://spreadsheets.google.com/feeds';
 
+sub update {
+    my $self = shift;
+    my $entry = shift;
+
+    die unless $entry->does("Net::Google::Spreadsheets::Entry");
+
+    my $response = $self->request->put(
+        $entry->edit_url,
+        [
+            "Content-Type" => "application/atom+xml",
+            "If-Match" => "*",
+        ],
+        $entry->to_string,
+    );
+
+    unless ($response->is_success) {
+        die "could not update row: ".$response->body;
+    }
+}
+
+sub add {
+    my $self = shift;
+    my $entry = shift;
+
+    die unless $entry->does("Net::Google::Spreadsheets::Entry");
+
+    my $response = $self->request->put(
+        $entry->add_url,
+        [
+            "Content-Type" => "application/atom+xml",
+            "IF-Match" => "*",
+        ],
+        $entry->to_string,
+    );
+}
+
 sub get_list {
     my $self = shift;
 
@@ -39,10 +75,8 @@ sub get_list {
 
     my @spreadsheet_object;
     foreach my $node (@spreadsheet_list) {
-        my @child = $node->getChildNodes;
-
         my $attributes = {};
-        foreach my $child_node (@child) {
+        foreach my $child_node ($node->getChildNodes) {
             if ($child_node->getName eq "author") {
                 foreach my $author_child_node (@{$child_node->getChildNodes}) {
                     $attributes->{"author_".$author_child_node->getName} =
@@ -69,34 +103,28 @@ sub get_worksheets {
 
     die unless ref $spreadsheet eq "Net::Google::Spreadsheets::Spreadsheet";
 
-    my @worksheets = $self->_get_nodes(
-        "//entry",
-        $self->request->get(
-            sprintf("%s/worksheets/%s/private/full",
-                $END_POINT,
-                $spreadsheet->id
-            )
-        )->body,
+    my @worksheets = $self->_get_entry(
+        sprintf("%s/worksheets/%s/private/full",
+            $END_POINT,
+            $spreadsheet->id
+        ),
     );
 
     my @worksheets_objects;
     foreach my $worksheet (@worksheets) {
-        my $attributes = {};
-        foreach my $child ($worksheet->getChildNodes) {
-            my $value_node = $child->getChildNodes->[0] or next;
+        my $attributes = $self->_build_attributes_hashref(
+            $worksheet,
+            \@NODE_NAME,
+            +{
+                'gs:rowCount' => 'row_count',
+                'gs:colCount' => 'col_count',
+            },
+        );
 
-            $attributes->{$child->getName} = $value_node->getValue
-                if List::MoreUtils::any {$_ eq $child->getName} @NODE_NAME;
-        }
-
-        $attributes->{'row_count'} = $attributes->{'gs:rowCount'};
-        delete $attributes->{'gs:rowCount'};
-        $attributes->{'col_count'} = $attributes->{'gs:colCount'};
-        delete $attributes->{'gs:colCount'};
-        $attributes->{id} = pop @{[ split "/", $attributes->{id} ]};
-        $attributes->{spreadsheet} = $spreadsheet,
-
-        push @worksheets_objects, Net::Google::Spreadsheets::Worksheet->new(%$attributes);
+        push @worksheets_objects, Net::Google::Spreadsheets::Worksheet->new(
+            %$attributes,
+            spreadsheet => $spreadsheet,
+        );
     }
 
     return @worksheets_objects;
@@ -109,39 +137,32 @@ sub get_rows {
 
     die unless ref $worksheet eq "Net::Google::Spreadsheets::Worksheet";
 
-    my $content = $self->request->get(
+    my @rows = $self->_get_entry(
         sprintf("%s/list/%s/%s/private/full",
             $END_POINT,
             $worksheet->spreadsheet->id,
             $worksheet->id,
-        )
-    );
-    die $content->message unless $content->code == 200;
-    my @rows = $self->_get_nodes(
-        "//entry",
-        $content->body,
+        ),
     );
 
     my @row_objects;
     foreach my $row (@rows) {
-        my $attributes = {
-            values => {},
-        };
+        my $attributes = $self->_build_attributes_hashref(
+            $row,
+            \@NODE_NAME,
+        );
+        $attributes->{values} = {};
         foreach my $child ($row->getChildNodes) {
             my $value_node = $child->getChildNodes->[0] or next;
             if ($child->getName =~ m/^gsx:(.+)/) {
                 $attributes->{values}->{$1} = $value_node->getValue;
             }
-
-            $attributes->{$child->getName} = $value_node->getValue
-                if List::MoreUtils::any {$_ eq $child->getName} @NODE_NAME;
         }
 
-        $attributes->{id} = pop @{[ split "/", $attributes->{id} ]};
-        $attributes->{worksheet} = $worksheet,
-        $attributes->{xml_string} = $row->toString;
-
-        push @row_objects, Net::Google::Spreadsheets::Row->new(%$attributes);
+        push @row_objects, Net::Google::Spreadsheets::Row->new(
+            %$attributes,
+            worksheet => $worksheet
+        );
     }
 
     return @row_objects;
@@ -154,20 +175,14 @@ sub get_row {
 
     die unless ref $row eq "Net::Google::Spreadsheets::Row";
 
-    my $content = $self->request->get(
+    my @rows = $self->_get_entry(
         sprintf("%s/list/%s/%s/private/full/%s",
             $END_POINT,
             $row->worksheet->spreadsheet->id,
             $row->worksheet->id,
             $row->id
-        )
-    )->body;
-
-    my @rows = $self->_get_nodes(
-        "//entry",
-        $content,
+        ),
     );
-    $row->xml_string($content);
 
     foreach my $child ($rows[0]->getChildNodes) {
         my $value_node = $child->getChildNodes->[0] or next;
@@ -182,27 +197,6 @@ sub get_row {
     return $row;
 }
 
-sub update {
-    my $self = shift;
-    my $entry = shift;
-
-    die unless $entry->does("Net::Google::Spreadsheets::Entry");
-
-    my $response = $self->request->put(
-        $entry->edit_url,
-        [
-            "Content-Type" => "application/atom+xml",
-            "If-Match" => $entry->etag,
-        ],
-        $entry->xml_string,
-    );
-
-    warn Data::Dumper::Dumper $response;
-    unless ($response->is_success) {
-        die "could not update row: ".$response->body;
-    }
-}
-
 sub get_cells {
     my $self = shift;
     my $worksheet = shift;
@@ -210,41 +204,35 @@ sub get_cells {
 
     die unless ref $worksheet eq "Net::Google::Spreadsheets::Worksheet";
 
-    my $content = $self->request->get(
+    my @cells = $self->_get_entry(
         sprintf("%s/cells/%s/%s/private/full",
             $END_POINT,
             $worksheet->spreadsheet->id,
             $worksheet->id,
-        )
-    );
-    die $content->message unless $content->code == 200;
-    my @cells = $self->_get_nodes(
-        "//entry",
-        $content->body,
+        ),
     );
 
     my @cell_objects;
     foreach my $cell (@cells) {
-        my $attributes = {};
+        my $attributes = $self->_build_attributes_hashref(
+            $cell,
+            \@NODE_NAME,
+            +{
+                title => 'position',
+                content => 'value',
+            }
+        );
         foreach my $child ($cell->getChildNodes) {
-            my $value_node = $child->getChildNodes->[0] or next;
-
-            $attributes->{$child->getName} = $value_node->getValue
-                if List::MoreUtils::any {$_ eq $child->getName} @NODE_NAME;
-
             if ($child->getName eq "gs:cell") {
                 $attributes->{col} = $child->getAttribute("col");
                 $attributes->{row} = $child->getAttribute("row");
             }
         }
 
-        $attributes->{position} = $attributes->{title};
-        delete $attributes->{title};
-        $attributes->{value} = $attributes->{content};
-        delete $attributes->{content};
-        $attributes->{worksheet} = $worksheet,
-
-        push @cell_objects, Net::Google::Spreadsheets::Cell->new(%$attributes);
+        push @cell_objects, Net::Google::Spreadsheets::Cell->new(
+            %$attributes,
+            worksheet => $worksheet,
+        );
     }
 
     return @cell_objects;
@@ -257,43 +245,60 @@ sub get_cell {
 
     die unless ref $cell eq "Net::Google::Spreadsheets::Cell";
 
-    my $content = $self->request->get(
+    my @cells = $self->_get_entry(
         sprintf("%s/cells/%s/%s/private/full/%s",
             $END_POINT,
             $cell->worksheet->spreadsheet->id,
             $cell->worksheet->id,
             $cell->id,
         )
-    )->body;
-    my @cells = $self->_get_nodes(
-        "//entry",
-        $content,
     );
-    $cell->xml_string($content);
 
-    my $attributes = {};
+    my $attributes = $self->_build_attributes_hashref(
+        $cells[0],
+        \@NODE_NAME,
+        +{
+            title => 'position',
+            content => 'value',
+        }
+    );
     foreach my $child ($cells[0]->getChildNodes) {
-        my $value_node = $child->getChildNodes->[0] or next;
-
-        $attributes->{$child->getName} = $value_node->getValue
-            if List::MoreUtils::any {$_ eq $child->getName} @NODE_NAME;
-
         if ($child->getName eq "gs:cell") {
             $attributes->{col} = $child->getAttribute("col");
             $attributes->{row} = $child->getAttribute("row");
         }
     }
 
-    $attributes->{position} = $attributes->{title};
-    delete $attributes->{title};
-    $attributes->{value} = $attributes->{content};
-    delete $attributes->{content};
-
     while (my ($key, $value) = each %$attributes) {
         $cell->$key($value);
     }
 
     return $cell;
+}
+
+sub _build_attributes_hashref {
+    my $self = shift;
+    my $entry = shift;
+    my $extract_node_name = shift || [];
+    my $convert_map = shift || {};
+
+    my $attributes = {};
+    foreach my $child ($entry->getChildNodes) {
+        my $value_node = $child->getChildNodes->[0] or next;
+
+        $attributes->{$child->getName} = $value_node->getValue
+            if List::MoreUtils::any {$_ eq $child->getName} @$extract_node_name;
+    }
+
+    $attributes->{id} = pop @{[ split "/", $attributes->{id} ]} if exists $attributes->{id};
+
+    foreach my $key (keys %$convert_map) {
+        next unless exists $attributes->{$key};
+        $attributes->{$convert_map->{$key}} = $attributes->{$key};
+        delete $attributes->{$key};
+    }
+
+    return $attributes;
 }
 
 sub _get_nodes {
@@ -304,6 +309,28 @@ sub _get_nodes {
     my $xml = XML::XPath->new(xml => $content);
 
     return $xml->findnodes($path)->get_nodelist;
+}
+
+sub _get_content {
+    my $self = shift;
+    my $method = lc(shift) || 'get';
+    my $url = shift;
+
+    my $content = $self->request->$method($url);
+    die $content->message unless $content->code == 200;
+
+    return $content;
+}
+
+sub _get_entry {
+    my $self = shift;
+    my $url = shift;
+    my $content = $self->_get_content('GET', $url);
+
+    return $self->_get_nodes(
+        "//entry",
+        $content->body,
+    );
 }
 
 sub _build_request {

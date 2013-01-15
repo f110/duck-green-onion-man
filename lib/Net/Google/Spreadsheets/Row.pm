@@ -13,11 +13,6 @@ has content => (
     isa => 'Str',
     default => "",
 );
-has updated => (
-    is => 'rw',
-    isa => 'Str',
-    default => "",
-);
 has values => (
     is => 'rw',
     isa => 'HashRef',
@@ -39,6 +34,23 @@ sub set_value {
     $xml->setNodeText(sprintf("//entry/gsx:%s", $key), $value);
     $self->values->{$key} = $value if exists $self->values->{$key};
     $self->xml_string(encode_utf8($xml->findnodes_as_string("//entry")));
+}
+
+sub add_url {
+    my $self = shift;
+
+    return sprintf(
+        'https://spreadsheets.google.com/feeds/list/%s/%s/private/full',
+        $self->worksheet->spreadsheet->id,
+        $self->worksheet->id,
+    );
+}
+
+sub edit_url {
+    my $self = shift;
+    my $xml = XML::XPath->new(xml => $self->xml_string);
+
+    return $xml->findvalue('//entry/link[@rel="edit"]/@href')->value;
 }
 
 1;

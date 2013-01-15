@@ -17,11 +17,6 @@ has value => (
     isa => 'Str',
     default => "",
 );
-has updated => (
-    is => 'rw',
-    isa => 'Str',
-    default => "",
-);
 has col => (
     is => 'rw',
     isa => 'Int',
@@ -36,26 +31,31 @@ has row => (
 __PACKAGE__->meta->make_immutable;
 no Mouse;
 
-use XML::XPath;
 use XML::DOM;
 use Encode;
 
 sub set_value {
-    my $self = shift;
-    my $value = shift;
+    my ($self, $value) = @_;
 
-    my $xml = XML::XPath->new(xml => $self->xml_string);
-    $xml->setNodeText(q{//entry/gs:cell/@inputValue}, $value);
-    $self->xml_string(encode_utf8($xml->findnodes_as_string("//entry")));
-}
+    $self->value($value);
 
-sub to_string {
-    my $self = shift;
+    my $entry_element = $self->dom->getElementsByTagName("entry")->item(0);
 
-    my $parser = XML::DOM::Parser->new();
-    my $dom = $parser->parse(BASE_XML());
-    $dom->getElementsByTagName("id")->item(0)->appendChild(
-        $dom->createTextNode(
+    # remove all gs:cell elements if it exists
+    my $cells = $self->dom->getElementsByTagName("gs:cell");
+    if ($cells->getLength > 0) {
+        my $length = $cells->getLength;
+        my $index = 0;
+        while ($index < $length) {
+            my $element = $cells->item($index);
+            $entry_element->removeChild($element);
+            $index++;
+         }
+    }
+
+    my $id_node = $self->dom->getElementsByTagName("id")->item(0)->getChildNodes;
+    $self->dom->getElementsByTagName("id")->item(0)->appendChild(
+        $self->dom->createTextNode(
             sprintf('https://spreadsheets.google.com/feeds/cells/%s/%s/private/full/%s',
                 $self->worksheet->spreadsheet->id,
                 $self->worksheet->id,
@@ -63,13 +63,26 @@ sub to_string {
             )
         )
     );
-    my $cell = $dom->createElement('gs:cell');
+    my $cell = $self->dom->createElement('gs:cell');
     $cell->setAttribute(row => $self->row);
     $cell->setAttribute(col => $self->col);
     $cell->setAttribute(inputValue => $self->value);
-    $dom->getDocumentElement->appendChild($cell);
+    $self->dom->getDocumentElement->appendChild($cell);
+}
 
-    return $dom->toString;
+sub add_url {
+    my $self = shift;
+
+    return sprintf(
+        'https://spreadsheets.google.com/feeds/cells/%s/%s/private/full/%s',
+        $self->worksheet->spreadsheet->id,
+        $self->worksheet->id,
+        $self->id,
+    );
+}
+
+sub edit_url {
+    return shift->add_url;
 }
 
 sub _build_id {

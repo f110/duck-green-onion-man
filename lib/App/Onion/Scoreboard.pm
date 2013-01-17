@@ -42,14 +42,13 @@ sub update_score {
         foreach my $cell (@cells) {
             $row = $cell->row if ($cell->col == 1 and $cell->value eq $team);
             $col = $cell->col if ($cell->row == 1 and $cell->value eq $question);
+            last if defined $row and defined $col;
         }
 
         foreach my $cell (@cells) {
-            warn Data::Dumper::Dumper [$cell->row, $cell->col];
             if ($cell->col == $col and $cell->row == $row) {
-                my $new_cell = $api->get_cell($cell);
-                $new_cell->set_value($point);
-                $api->update($new_cell);
+                $cell->set_value($point);
+                $api->update($cell);
                 last;
             }
         }

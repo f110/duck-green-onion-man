@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ja">
+    <head>
+        <title>メッセージ</title>
+        <link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
+        <link href="css/bootstrap-responsive.min.css" rel="stylesheet" media="screen">
+        <style type="text/css">
+        <!--
+        form {
+            margin: 0px;
+        }
+        -->
+        </style>
+    </head>
+    <body>
+    <div class="navbar navbar-inverse navbar-static-top">
+        <div class="navbar-inner">
+            <div class="container">
+                <a class="brand" href="#">鴨ネギ男</a>
+                <ul class="nav">
+                    <li><a href="/update_list">Refresh User List</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <h1>メッセージ</h1>
+        <form action="/update" method="GET" class="form-inline">
+        <input type="hidden" name="id" value="<%= $id %>">
+        <table class="table table-bordered">
+            <tr>
+                <th>チーム</th>
+                <td>
+                    <select name="team" class="span1">
+                        % for my $team (@$teams) {
+                        <option value="<%= $team->{value} %>"<%= $team->{selected} %>><%= $team->{name} %></option>
+                        % }
+                    </select>
+                </td>
+                <th>問題</th>
+                <td>
+                    <select name="q_number" class="span1">
+                        % for my $question (@$questions) {
+                        <option value="<%= $question->{value} %>"><%= $question->{name} %></option>
+                        % }
+                    </select>
+                </td>
+                <th>得点</th>
+                <td>
+                    <input type="text" name="point" class="span1">
+                </td>
+                <th>
+                    <input type="submit" class="btn btn-small btn-primary" value="正解！">
+                </th>
+            </tr>
+        </table>
+        </form>
+        <table class="table table-striped">
+            <tr>
+                <th>送信者</th>
+                <td><%= $sender_name %></td>
+            </tr>
+            <tr>
+                <th>受信日</th>
+                <td><%= $send_date %></td>
+            </tr>
+            <tr>
+                <th>タイトル</th>
+                <td><%= $title %></td>
+            </tr>
+            <tr>
+                <th colspan=2>本文</th>
+            </tr>
+            <tr>
+                <td colspan=2><%= $body %></td>
+            </tr>
+        </table>
+    </div>
+    </body>
+</html>

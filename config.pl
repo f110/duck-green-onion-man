@@ -16,5 +16,6 @@
     access_token_file => './access_token.pl',
     scoreboard_spreadsheet_id => '',
     scoreboard_worksheet_id => '',
-
+    id_list_worksheet_id => '',
+    id_list_spreadsheet_id => '',
 }

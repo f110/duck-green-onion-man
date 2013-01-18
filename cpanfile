@@ -17,3 +17,4 @@ requires 'Furl';
 requires 'XML::Simple';
 requires 'XML::XPath';
 requires 'XML::DOM';
+requires 'URI::Find';

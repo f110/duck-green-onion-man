@@ -2,3 +2,4 @@ local/
 .carton
 message.db
 message_list.db
+.DS_Store

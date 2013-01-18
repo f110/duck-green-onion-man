@@ -26,16 +26,16 @@ my $oauth_client = OAuth::Lite2::Client::WebServer->new(
 my $new_token = $oauth_client->refresh_access_token(refresh_token => $tokens->{refresh_token});
 my $access_token = $new_token->{access_token};
 
-#subtest 'Retrieving a list of spreadsheets' => sub {
-    #my $spreadsheets = Net::Google::Spreadsheets->new(
-        #access_token => $access_token,
-    #);
+subtest 'Retrieving a list of spreadsheets' => sub {
+    my $spreadsheets = Net::Google::Spreadsheets->new(
+        access_token => $access_token,
+    );
 
-    #my @spreadsheet_list = $spreadsheets->get_list;
-    #warn Data::Dumper::Dumper \@spreadsheet_list;
+    my @spreadsheet_list = $spreadsheets->get_list;
+    warn Data::Dumper::Dumper \@spreadsheet_list;
 
-    #ok 1;
-#};
+    ok 1;
+};
 
 #subtest 'Retrieving infomation about worksheets' => sub {
     #my $api = Net::Google::Spreadsheets->new(

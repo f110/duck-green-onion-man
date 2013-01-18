@@ -17,6 +17,7 @@ __PACKAGE__->meta->make_immutable;
 no Mouse;
 
 use Net::Google::Spreadsheets;
+use Net::Google::Spreadsheets::Cell;
 use OAuth::Lite2::Client::WebServer;
 use IO::File;
 use IO::Handle;
@@ -51,6 +52,17 @@ sub update_score {
                 $api->update($cell);
                 last;
             }
+        }
+
+        if (defined $row and defined $col) {
+            my $new_cell = Net::Google::Spreadsheets::Cell->new(
+                row => $row,
+                col => $col,
+                worksheet => $self->worksheet,
+            );
+            $new_cell->set_value($point);
+
+            $api->add($new_cell);
         }
     };
     if ($@) {

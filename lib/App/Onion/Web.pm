@@ -4,6 +4,8 @@ use warnings;
 use Sys::Hostname;
 use DBM::Deep;
 use Mojolicious::Lite;
+use Mojo::ByteStream qw/b/;
+use URI::Find;
 use App::Onion::Scoreboard;
 use App::Onion::IDList;
 use Net::Google::Spreadsheets::Worksheet;
@@ -34,10 +36,25 @@ get '/' => sub {
     foreach my $id (reverse @$message_ids) {
         push @messages, +{
             id => $id,
-            %{$messages_detail->{$id}}
+            %{$messages_detail->{$id}},
+            teams => [
+                map {
+                    +{
+                        name => $_,
+                        value => $_,
+                        selected => _get_team_name_from_sender_id($messages_detail->{$id}->{sender}) eq $_ ? " selected" : "",
+                    }
+                } @TEAM
+            ],
         };
     }
 
+    $self->stash->{questions} = [ map {
+        +{
+            name => sprintf("Q%d", $_),
+            value => $_,
+        }
+    } 1..10 ];
     $self->stash->{messages} = \@messages;
     $self->render('message_list');
 };
@@ -52,7 +69,7 @@ get '/message' => sub {
 
     my $team_name = _get_team_name_from_sender_id($all_info->{sender});
     $self->stash->{id} = $message_id;
-    $self->stash->{$_} = $all_info->{$_} || "unknown" for qw/sender_name send_date title body/;
+    $self->stash->{$_} = $all_info->{$_} || "unknown" for qw/sender sender_name send_date title body/;
     $self->stash->{teams} = [ map {
         +{
             name => $_,
@@ -67,6 +84,7 @@ get '/message' => sub {
         }
     } 1..10 ];
 
+    $self->stash->{body} = b(url_link($self->stash->{body}));
     return $self->render('message');
 };
 
@@ -118,6 +136,18 @@ sub _get_team_name_from_sender_id {
 
 sub _refresh_user_list {
     %SENDER_ID_TO_TEAM = App::Onion::IDList->id_to_team($conf);
+}
+
+sub url_link {
+    my $text = shift;
+
+    my $finder = URI::Find->new(sub {
+        my($uri, $orig_uri) = @_;
+        return qq|<a href="$uri">$orig_uri</a>|;
+    });
+    $finder->find(\$text);
+
+    return $text;
 }
 
 1;

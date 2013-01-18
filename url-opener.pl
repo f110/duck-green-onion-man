@@ -188,6 +188,7 @@ sub timer_callback {
             my $view_message_url = $uri_object->as_string;
             say $view_message_url;
             $view_message_url = "http://localhost:$port/message?id=$id" unless $no_web;
+            sleep 3;
             system qq#open "$view_message_url"#;
         }
 

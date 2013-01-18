@@ -63,6 +63,10 @@ sub add {
         ],
         $entry->to_string,
     );
+
+    unless ($response->is_success) {
+        die "could not update row: ".$response->body;
+    }
 }
 
 sub get_list {

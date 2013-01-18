@@ -16,9 +16,9 @@
     <div class="navbar navbar-inverse navbar-static-top">
         <div class="navbar-inner">
             <div class="container">
-                <a class="brand" href="#">鴨ネギ男</a>
+                <a class="brand" href="/">鴨ネギ男</a>
                 <ul class="nav">
-                    <li><a href="/update_list">Refresh User List</a></li>
+                    <li><a href="/refresh_list">Refresh User List</a></li>
                 </ul>
             </div>
         </div>
@@ -51,6 +51,9 @@
                 </td>
                 <th>
                     <input type="submit" class="btn btn-small btn-primary" value="正解！">
+                </th>
+                <th>
+                    <a href="http://mixi.jp/reply_message.pl?reply_message_id=<%= $id %>&id=<%= $sender %>">返信</a>
                 </th>
             </tr>
         </table>

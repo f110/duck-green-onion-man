@@ -184,13 +184,6 @@ sub timer_callback {
             id => $id,
             box => "inbox",
         });
-        if ($auto_message_open) {
-            my $view_message_url = $uri_object->as_string;
-            say $view_message_url;
-            $view_message_url = "http://localhost:$port/message?id=$id" unless $no_web;
-            sleep 3;
-            system qq#open "$view_message_url"#;
-        }
 
         {
             $res = _mechanize_get($mech, $uri_object);
@@ -214,9 +207,17 @@ sub timer_callback {
                 warn "something wrong. unable to get sender name and id";
             }
         }
-
         say "";
         say "====================";
+
+        # notify to browser when after write message detail
+        # because web server using it
+        if ($auto_message_open) {
+            my $view_message_url = $uri_object->as_string;
+            say $view_message_url;
+            $view_message_url = "http://localhost:$port/message?id=$id" unless $no_web;
+            system qq#open "$view_message_url"#;
+        }
     }
 }
 

@@ -53,7 +53,7 @@
                     <input type="submit" class="btn btn-small btn-primary" value="正解！">
                 </th>
                 <th>
-                    <a href="http://mixi.jp/reply_message.pl?reply_message_id=<%= $id %>&id=<%= $sender %>">返信</a>
+                    <a href="http://sc.mixi.jp:8300/reply_message.pl?reply_message_id=<%= $id %>&id=<%= $sender %>">返信</a>
                 </th>
             </tr>
         </table>

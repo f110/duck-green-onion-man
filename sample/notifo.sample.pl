@@ -3,7 +3,7 @@ use warnings;
 use LWP::UserAgent;
 use HTTP::Request;
 
-my $config = do "config.pl" or die;
+my $config = do "../config.pl" or die;
 
 my $req = HTTP::Request->new(POST => "https://api.notifo.com/v1/send_message");
 $req->content("to=".$config->{notifo_username}."&msg=Got new Message!");
@@ -27,7 +27,7 @@ notifo.sample.pl - notifoの動作テスト用
 =head1 SYNOPSIS
 
     $ carton install
-    $ carton exec -- perl notifo.sample.pl
+    $ carton exec -- perl sample/notifo.sample.pl
 
 =head1 DESCRIPTION
 

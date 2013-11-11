@@ -3,7 +3,7 @@ use warnings;
 use LWP::UserAgent;
 use HTTP::Request;
 
-my $config = do "config.pl" or die;
+my $config = do "../config.pl" or die;
 
 my $req = HTTP::Request->new(
     POST => "http://im.kayac.com/api/post/".$config->{im_kayac_username}
@@ -25,7 +25,7 @@ im.kayac.sample.pl - im.kayac.comの動作テスト用
 =head1 SYNOPSIS
 
     $ carton install
-    $ carton exec -- perl im.kayac.sample.pl
+    $ carton exec -- perl sample/im.kayac.sample.pl
 
 =head1 DESCRIPTION
 

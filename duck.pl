@@ -305,16 +305,16 @@ __END__
 
 =head1 NAME
 
-url-opener.pl - 監視スクリプト
+duck.pl - 監視スクリプト
 
 =head1 SYNOPSIS
 
     $ carton install
-    $ carton exec -- perl url-opener.pl
+    $ carton exec -- perl duck.pl
 
 おすすめ実行コマンド
 
-    $ carton exec -- perl url-opener.pl --notify=notifo --message_open
+    $ carton exec -- perl duck.pl --notify=notifo --message_open
 
 =head1 DESCRIPTION
 
@@ -342,11 +342,11 @@ growlnotifyコマンドがパスが通ったディレクトリにインストー
 
 im.kayac.comを使う場合は以下のようにします．
 
-    $ carton exec -- perl url-opener.pl --notify "kayac"
+    $ carton exec -- perl duck.pl --notify "kayac"
 
 notifoを使う場合は以下のようにします．
 
-    $ carton exec -- perl url-opener.pl --notify "notifo"
+    $ carton exec -- perl duck.pl --notify "notifo"
 
 im.kayac.comはiPhoneのみ．notifoもstableではiPhoneのみですが，Androidアプリも存在し
 Androidへ通知を送る事も出来ます．

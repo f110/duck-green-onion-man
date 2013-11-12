@@ -20,7 +20,7 @@ has sender => (
 has sender_name => (
     is => 'ro',
     isa => 'Str',
-    default => '',;
+    default => '',
 );
 has body => (
     is => 'ro',

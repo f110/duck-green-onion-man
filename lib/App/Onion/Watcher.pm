@@ -8,10 +8,10 @@ use URI;
 use App::Onion::MechanizeFactory;
 use App::Onion::Watcher::Web;
 use App::Onion::Watcher::Options;
-use App::Onion::Watcher::DB::DBM;
+use App::Onion::DB::DBM;
 
 sub app {
-    my ($class, %arg) = @_;
+    my ($class, %args) = @_;
 
     my $mech = App::Onion::MechanizeFactory->logged_in(
         $args{site},
@@ -24,17 +24,19 @@ sub app {
         my $cv = AnyEvent->condvar;
         my $watcher = App::Onion::Watcher::Web->new(
             mech => $mech,
+            cv   => $cv,
             site => $uri,
-            db => App::Onion::Watcher::DB::DBM->new,
-            opt => App::Onion::Watcher::Options->new(
-                notify => $args{notify},
+            db   => App::Onion::Watcher::DB::DBM->new,
+            opt  => App::Onion::Watcher::Options->new(
+                notify       => $args{notify},
                 message_open => $args{message_open},
-                notifies => [],
+                no_web       => $args{no_web},
+                notifies     => [],
             ),
         );
 
         my $timer = AnyEvent->timer(
-            interval => $interval,
+            interval => $args{interval},
             cb => sub {
                 $watcher->timer_callback,
             },

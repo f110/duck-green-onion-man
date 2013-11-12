@@ -53,21 +53,14 @@ my $proclet = Proclet->new(color => 1);
 
 # add watcher to supervisor
 unless ($no_watcher) {
-    {
-        my @new_message_ids = get_message_ids($res->decoded_content);
-        my @Ronly = calc_new_message_ids($message_ids, \@new_message_ids);
-
-        if (scalar @Ronly > 0) {
-            store_new_messages(@Ronly);
-        }
-    }
-
     my $watcher = App::Onion::Watcher->app(
         site         => $url,
         email        => $conf->{login_mail},
         password     => $conf->{login_password},
         notify       => $notify_to_phone,
         message_open => $auto_message_open,
+        no_web       => $no_web,
+        interval     => $interval,
     );
     $proclet->service(
         code   => $watcher,

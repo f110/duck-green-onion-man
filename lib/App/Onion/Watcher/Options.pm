@@ -16,6 +16,10 @@ has message_open => (
     is => 'ro',
     isa => 'Bool',
 );
+has no_web => (
+    is => 'ro',
+    isa => 'Bool',
+);
 
 1;
 __END__

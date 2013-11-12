@@ -50,6 +50,7 @@ sub create_message {
 
     # initialize
     $self->detail->{$message_object->id} = $message_object->to_plain;
+}
 
 sub delete_message {
     my ($self, %args) = @_;

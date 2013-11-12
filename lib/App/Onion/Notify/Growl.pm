@@ -1,6 +1,11 @@
 package App::Onion::Notify::Growl;
 use strict;
 use warnings;
+use Mouse;
+
+with 'App::Onion::Notify::Base';
+
+no Mouse;
 
 sub call {
     system q#growlnotify -t '鴨ネギ男' -m 'Got new message!'#;

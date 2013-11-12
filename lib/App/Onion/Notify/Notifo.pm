@@ -1,6 +1,11 @@
 package App::Onion::Notify::Notifo;
 use strict;
 use warnings;
+use Mouse;
+
+with 'App::Onion::Notify::Base';
+
+no Mouse;
 use Furl;
 use HTTP::Request;
 

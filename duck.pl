@@ -5,19 +5,11 @@ use File::Spec;
 use File::Basename;
 use lib File::Spec->catdir(dirname(__FILE__), 'lib');
 
-use HTML::TreeBuilder::XPath;
-use List::Compare qw//;
 use Encode;
-use HTTP::Request;
-use LWP::UserAgent;
-use Date::Calc qw//;
 use Getopt::Long qw/:config posix_default no_ignore_case gnu_compat/;
-use URI;
-use Carp;
 use Proclet;
 use Plack::Loader;
 use Plack::Builder;
-use DBM::Deep;
 
 use App::Onion::Parser;
 use App::Onion::Web;
@@ -56,19 +48,6 @@ GetOptions(
 
 my $conf = do $config_file or die;
 
-# open databse file
-my $messages_detail = DBM::Deep->new(
-    file => "message.db",
-    type => DBM::Deep->TYPE_HASH,
-    autoflush => 1,
-);
-
-my $message_ids = DBM::Deep->new(
-    file => "message_list.db",
-    type => DBM::Deep->TYPE_ARRAY,
-    autoflush => 1,
-);
-
 # setup supervisor
 my $proclet = Proclet->new(color => 1);
 
@@ -83,11 +62,17 @@ unless ($no_watcher) {
         }
     }
 
-    my $watcher = App::Onion::Watcher->app;
+    my $watcher = App::Onion::Watcher->app(
+        site         => $url,
+        email        => $conf->{login_mail},
+        password     => $conf->{login_password},
+        notify       => $notify_to_phone,
+        message_open => $auto_message_open,
+    );
     $proclet->service(
-        code => $watcher,
+        code   => $watcher,
         worker => 1,
-        tag => "Watcher",
+        tag    => "Watcher",
     );
 }
 

@@ -39,24 +39,15 @@ sub timer_callback {
     my $parse = App::Onion::Parser->new($res->decoded_content);
     my @new_message_ids = $parse->get_message_ids;
 
-    my @Ronly = calc_new_message_ids(\@{$self->{message_ids}}, \@new_message_ids);
+    my @Ronly = calc_new_message_ids($self->db->fetch_id_list, \@new_message_ids);
 
     # 新規メッセージがないなら終了
     return if scalar @Ronly == 0;
     # 以下新規メッセージがある場合の処理
 
-    $self->store_new_messages(@Ronly);
-
     # notification
     if ($growl_notify) {
         App::Onion::Notify::Growl->call;
-    }
-
-    # push notification
-    if ($self->opt->notify) {
-        for $notifier (@{$self->notifies}) {
-            $notifier->call;
-        }
     }
 
     foreach my $id (@Ronly) {
@@ -87,11 +78,14 @@ sub timer_callback {
                 say "Title: $message_title";
                 say "Body: $message_body";
 
-                $messages_detail->{$id}->{sender} = $sender_id;
-                $messages_detail->{$id}->{sender_name} = $sender_id;
-                $messages_detail->{$id}->{send_date} = $message_send_date;
-                $messages_detail->{$id}->{title} = $message_title;
-                $messages_detail->{$id}->{body} = $message_body;
+                $self->db->create_message({
+                    id => $id,
+                    sender => $sender_id,
+                    sender_name => $sender_name,
+                    send_date => $message_send_date,
+                    title => $message_title,
+                    body => $message_body,
+                });
             } else {
                 warn "something wrong. unable to get sender name and id";
             }
@@ -101,13 +95,21 @@ sub timer_callback {
 
         # notify to browser when after write message detail
         # because web server using it
-        if ($self->message_open) {
+        if ($self->opt->message_open) {
             my $view_message_url = $uri_object->as_string;
             say $view_message_url;
             $view_message_url = "http://localhost:$port/message?id=$id" unless $no_web;
             system qq#open "$view_message_url"#;
         }
     }
+
+    # push notification
+    if ($self->opt->notify) {
+        for $notifier (@{$self->opt->notifies}) {
+            $notifier->call;
+        }
+    }
+
 }
 
 sub calc_new_message_ids {
@@ -130,26 +132,6 @@ sub dbm_array_to_array_ref {
     my @normal_array = @$dbm_array;
 
     return \@normal_array;
-}
-
-sub store_new_messages {
-    my ($self) = @_;
-    my @new_message_ids = @_;
-
-    # add message list db
-    push @{$self->{message_ids}}, @new_message_ids;
-
-    # initialize entry in message detail db
-    foreach my $message_id (@new_message_ids) {
-        $self->{messages_detail}->{$message_id} = {
-            sender => "",
-            sender_name => "",
-            send_date => "",
-            title => "",
-            body => "",
-            mark => 0,
-        };
-    }
 }
 
 1;

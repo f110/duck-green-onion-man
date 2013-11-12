@@ -10,25 +10,48 @@ has raw => (
 has id => (
     is => 'ro',
     isa => 'Int',
+    default => 0,
 );
 has sender => (
     is => 'ro',
     isa => 'Str',
+    default => '',
+);
+has sender_name => (
+    is => 'ro',
+    isa => 'Str',
+    default => '',;
 );
 has body => (
     is => 'ro',
     isa => 'Str',
+    default => '',
 );
 has title => (
     is => 'ro',
     isa => 'Str',
+    default => '',
 );
 has send_date => (
     is => 'ro',
     isa => 'Str',
+    default => '',
 );
 
 no Mouse;
+
+sub to_plain {
+    my ($self) = @_;
+
+    return +{
+        id          => $self->id,
+        sender      => $self->sender,
+        sender_name => $self->sender_name,
+        body        => $self->body,
+        title       => $self->title,
+        send_date   => $self->send_date,
+    };
+}
 
 1;
 __END__

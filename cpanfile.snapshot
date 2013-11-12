@@ -878,6 +878,7 @@ DISTRIBUTIONS
       ojo undef
     requirements:
       ExtUtils::MakeMaker 0
+      perl 5.010001
   Mouse-2.0.0
     pathname: G/GF/GFUJI/Mouse-2.0.0.tar.gz
     provides:

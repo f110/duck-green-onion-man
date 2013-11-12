@@ -7,6 +7,11 @@ has notify => (
     is => 'ro',
     isa => 'Bool',
 );
+has notifies => (
+    is => 'rw',
+    isa => 'ArrayRef[App::Onion::Notify::Base]',
+    default => sub {[]},
+);
 has message_open => (
     is => 'ro',
     isa => 'Bool',

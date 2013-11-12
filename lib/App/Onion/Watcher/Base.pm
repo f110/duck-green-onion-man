@@ -3,15 +3,7 @@ use strict;
 use warnings;
 use Mouse::Role;
 
-has notifies => (
-    is => 'rw',
-    isa => 'ArrayRef[App::Onion::Notify::Base]',
-);
-has messages => (
-    is => 'ro',
-    isa => 'App::Onion::Messages',
-);
-has datastore => (
+has db => (
     is => 'ro',
     isa => 'App::Onion::Watcher::DB',
 );

@@ -3,8 +3,11 @@ use strict;
 use warnings;
 use AnyEvent;
 use Carp;
+use URI;
 
+use App::Onion::MechanizeFactory;
 use App::Onion::Watcher::Web;
+use App::Onion::Watcher::Options;
 use App::Onion::Watcher::DB::DBM;
 
 sub app {
@@ -22,7 +25,12 @@ sub app {
         my $watcher = App::Onion::Watcher::Web->new(
             mech => $mech,
             site => $uri,
-            datastore => App::Onion::Watcher::DB::DBM->new,
+            db => App::Onion::Watcher::DB::DBM->new,
+            opt => App::Onion::Watcher::Options->new(
+                notify => $args{notify},
+                message_open => $args{message_open},
+                notifies => [],
+            ),
         );
 
         my $timer = AnyEvent->timer(

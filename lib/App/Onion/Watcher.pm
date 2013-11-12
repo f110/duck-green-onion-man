@@ -5,6 +5,7 @@ use AnyEvent;
 use Carp;
 
 use App::Onion::Watcher::Web;
+use App::Onion::Watcher::DB::DBM;
 
 sub app {
     my ($class, %arg) = @_;
@@ -21,6 +22,7 @@ sub app {
         my $watcher = App::Onion::Watcher::Web->new(
             mech => $mech,
             site => $uri,
+            datastore => App::Onion::Watcher::DB::DBM->new,
         );
 
         my $timer = AnyEvent->timer(

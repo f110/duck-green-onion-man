@@ -11,6 +11,10 @@ has messages => (
     is => 'ro',
     isa => 'App::Onion::Messages',
 );
+has datastore => (
+    is => 'ro',
+    isa => 'App::Onion::Watcher::DB',
+);
 
 requires 'timer_callback';
 

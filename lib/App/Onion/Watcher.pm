@@ -18,13 +18,14 @@ sub app {
 
     return sub {
         my $cv = AnyEvent->condvar;
+        my $watcher = App::Onion::Watcher::Web->new(
+            mech => $mech,
+            site => $uri,
+        );
+
         my $timer = AnyEvent->timer(
             interval => $interval,
             cb => sub {
-                my $watcher = App::Onion::Watcher::Web->new(
-                    mech => $mech,
-                    site => $uri,
-                ),
                 $watcher->timer_callback,
             },
         );

@@ -7,6 +7,12 @@ has notifies => (
     is => 'rw',
     isa => 'ArrayRef[App::Onion::Notify::Base]',
 );
+has messages => (
+    is => 'ro',
+    isa => 'App::Onion::Messages',
+);
+
+requires 'timer_callback';
 
 1;
 __END__

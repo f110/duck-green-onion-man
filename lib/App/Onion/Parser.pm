@@ -1,21 +1,20 @@
 package App::Onion::Parser;
 use strict;
 use warnings;
-use parent qw/Exporter/;
 use HTML::TreeBuilder::XPath;
 use URI;
 use Data::Dumper;
 
-our @EXPORT = qw/
-    get_sender
-    get_message_ids
-    get_body
-    get_title
-    get_send_date
-/;
+sub new {
+    my ($class, $raw) = @_;
+    return bless {
+        raw => $raw,
+    }, $class;
+}
 
-sub get_sender($) {
-    my $html = shift;
+sub get_sender {
+    my ($self) = @_;
+    my $html = $self->{raw};
     return (undef, undef) unless $html;
     my $tree = HTML::TreeBuilder::XPath->new_from_content($html);
 
@@ -30,7 +29,9 @@ sub get_sender($) {
 }
 
 sub get_message_ids {
-    my $html = shift;
+    my ($self) = @_;
+    my $html = $self->{raw};
+
     return unless $html;
     my $tree = HTML::TreeBuilder::XPath->new_from_content($html);
 
@@ -45,7 +46,8 @@ sub get_message_ids {
 }
 
 sub get_body {
-    my $html = shift;
+    my ($self) = @_;
+    my $html = $self->{raw};
     return unless $html;
 
     my $tree = HTML::TreeBuilder::XPath->new_from_content($html);
@@ -68,7 +70,8 @@ sub get_body {
 }
 
 sub get_title {
-    my $html = shift;
+    my ($self) = @_;
+    my $html = $self->{raw};
     return unless $html;
 
     my $tree = HTML::TreeBuilder::XPath->new_from_content($html);
@@ -84,7 +87,8 @@ sub get_title {
 }
 
 sub get_send_date {
-    my $html = shift;
+    my ($self) = @_;
+    my $html = $self->{raw};
     return unless $html;
 
     my $tree = HTML::TreeBuilder::XPath->new_from_content($html);
@@ -104,9 +108,5 @@ __END__
 App::Onion::Parser -
 
 =head1 SYNOPSIS
-
-    use App::Onion::Parser;
-
-    my $sneder = get_sender($decoded_content);
 
 =cut

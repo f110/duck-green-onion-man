@@ -19,3 +19,5 @@ requires 'XML::Simple';
 requires 'XML::XPath';
 requires 'XML::DOM';
 requires 'URI::Find';
+requires 'Try::Tiny';
+requires 'Class::Load';

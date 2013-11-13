@@ -34,18 +34,18 @@ my $no_web;
 my $no_watcher;
 
 GetOptions(
-    "d|debug" => \$debug,
-    "g|growl" => \$growl_notify,
+    "d|debug"        => \$debug,
+    "g|growl"        => \$growl_notify,
     "m|message_open" => \$auto_message_open,
-    "i|interval=s" => \$interval,
-    "p|port=s" => \$port,
-    "host=s" => \$host,
-    "notify=s" => \$notify_to_phone,
-    "config=s" => \$config_file,
-    "hosts" => \$use_local_hosts,
-    "no-web" => \$no_web,
-    "no-watcher" => \$no_watcher,
-);
+    "i|interval=s"   => \$interval,
+    "p|port=s"       => \$port,
+    "host=s"         => \$host,
+    "notify=s"       => \$notify_to_phone,
+    "config=s"       => \$config_file,
+    "hosts"          => \$use_local_hosts,
+    "no-web"         => \$no_web,
+    "no-watcher"     => \$no_watcher,
+) or exit(1);
 
 my $conf = do $config_file or die;
 

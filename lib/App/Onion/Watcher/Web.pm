@@ -40,8 +40,11 @@ sub timer_callback {
         $self->cv->send("Connection Lost!!");
         return;
     }
-    my $parse = App::Onion::Parser->new($res->decoded_content);
-    my @new_message_ids = $parse->get_message_ids;
+    my $parser = App::Onion::Parser->build(
+        target => "list_message",
+        content => $res->decoded_content,
+    );
+    my @new_message_ids = $parser->get_message_ids;
 
     my @Ronly = calc_new_message_ids($self->db->fetch_id_list, \@new_message_ids);
 
@@ -63,40 +66,41 @@ sub timer_callback {
             box => "inbox",
         });
 
-        {
-            my $res = $self->mech->get($url);
-            my $decoded_content = $res->decoded_content;
-            my $parse = App::Onion::Parser->new($res->decoded_content);
-            my ($sender_name, $sender_id) = $parse->get_sender;
-            my $message_send_date = $parse->get_send_date;
-            my $message_title = $parse->get_title;
-            my $message_body = $parse->get_body;
-            if (defined $sender_name and defined $sender_id) {
-                say "From: $sender_name";
-                say "Sender ID: $sender_id";
-                say "Title: $message_title";
-                say "Body: $message_body";
+        my $res = $self->mech->get($url);
+        my $decoded_content = $res->decoded_content;
+        my $parser = App::Onion::Parser->build(
+            target => "view_message",
+            content => $res->decoded_content,
+        );
+        my ($sender_name, $sender_id) = $parser->get_sender;
+        my $message_send_date = $parser->get_send_date;
+        my $message_title = $parser->get_title;
+        my $message_body = $parser->get_body;
+        if (defined $sender_name and defined $sender_id) {
+            say "From: $sender_name";
+            say "Sender ID: $sender_id";
+            say "Title: $message_title";
+            say "Body: $message_body";
 
-                $self->db->create_message({
-                    id => $id,
-                    sender => $sender_id,
-                    sender_name => $sender_name,
-                    send_date => $message_send_date,
-                    title => $message_title,
-                    body => $message_body,
-                });
-            } else {
-                warn "something wrong. unable to get sender name and id";
-            }
+            $self->db->create_message({
+                id          => $id,
+                sender      => $sender_id,
+                sender_name => $sender_name,
+                send_date   => $message_send_date,
+                title       => $message_title,
+                body        => $message_body,
+            });
+        } else {
+            warn "something wrong. unable to get sender name and id";
         }
         say "";
         say "====================";
 
-        # notify to browser when after write message detail
+        # open a browser when after write message detail to db
         # because web server using it
-        if ($self->opt->message_open) {
-            #my $view_message_url = "http://localhost:$port/message?id=$id" unless $self->opt->no_web;
-            #system qq#open "$view_message_url"#;
+        if ($self->opt->message_open && !$self->opt->no_web) {
+            my $view_message_url = sprintf("http://localhost:%d/message?id=%d", $self->opt->port, $id);
+            system qq#open "$view_message_url"#;
         }
     }
 

@@ -1,5 +1,14 @@
 # carton snapshot format: version 1.0
 DISTRIBUTIONS
+  Any-Moose-0.21
+    pathname: S/SA/SARTAK/Any-Moose-0.21.tar.gz
+    provides:
+      Any::Moose 0.21
+      AnyMooseTest undef
+      inc::MakeMaker undef
+    requirements:
+      ExtUtils::MakeMaker 6.30
+      Mouse 0.40
   AnyEvent-7.05
     pathname: M/ML/MLEHMANN/AnyEvent-7.05.tar.gz
     provides:
@@ -878,7 +887,6 @@ DISTRIBUTIONS
       ojo undef
     requirements:
       ExtUtils::MakeMaker 0
-      perl 5.010001
   Mouse-2.0.0
     pathname: G/GF/GFUJI/Mouse-2.0.0.tar.gz
     provides:
@@ -918,6 +926,40 @@ DISTRIBUTIONS
       Scalar::Util 1.14
       Test::More 0.88
       XSLoader 0.02
+      perl 5.006002
+  MouseX-NativeTraits-1.09
+    pathname: G/GF/GFUJI/MouseX-NativeTraits-1.09.tar.gz
+    provides:
+      Mouse::Meta::Attribute::Custom::Trait::Array undef
+      Mouse::Meta::Attribute::Custom::Trait::Bool undef
+      Mouse::Meta::Attribute::Custom::Trait::Code undef
+      Mouse::Meta::Attribute::Custom::Trait::Counter undef
+      Mouse::Meta::Attribute::Custom::Trait::Hash undef
+      Mouse::Meta::Attribute::Custom::Trait::Number undef
+      Mouse::Meta::Attribute::Custom::Trait::String undef
+      Mouse::Meta::Attribute::Native 1.09
+      MouseX::NativeTraits 1.09
+      MouseX::NativeTraits::ArrayRef undef
+      MouseX::NativeTraits::Bool undef
+      MouseX::NativeTraits::CodeRef undef
+      MouseX::NativeTraits::Counter undef
+      MouseX::NativeTraits::HashRef undef
+      MouseX::NativeTraits::MethodProvider undef
+      MouseX::NativeTraits::MethodProvider::ArrayRef undef
+      MouseX::NativeTraits::MethodProvider::Bool undef
+      MouseX::NativeTraits::MethodProvider::CodeRef undef
+      MouseX::NativeTraits::MethodProvider::Counter undef
+      MouseX::NativeTraits::MethodProvider::HashRef undef
+      MouseX::NativeTraits::MethodProvider::Num undef
+      MouseX::NativeTraits::MethodProvider::Str undef
+      MouseX::NativeTraits::Num undef
+      MouseX::NativeTraits::Str undef
+    requirements:
+      Any::Moose 0.13
+      ExtUtils::MakeMaker 6.59
+      Mouse 0.82
+      Test::Fatal 0.003
+      Test::More 0.88
       perl 5.006002
   Mozilla-CA-20130114
     pathname: A/AB/ABH/Mozilla-CA-20130114.tar.gz

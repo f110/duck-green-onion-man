@@ -7,7 +7,6 @@ use URI;
 
 use App::Onion::MechanizeFactory;
 use App::Onion::Watcher::Web;
-use App::Onion::Watcher::Options;
 use App::Onion::DB::DBM;
 
 sub app {
@@ -27,12 +26,7 @@ sub app {
             cv   => $cv,
             site => $uri,
             db   => App::Onion::Watcher::DB::DBM->new,
-            opt  => App::Onion::Watcher::Options->new(
-                notify       => $args{notify},
-                message_open => $args{message_open},
-                no_web       => $args{no_web},
-                notifies     => [],
-            ),
+            opt  => $args{opt},
         );
 
         my $timer = AnyEvent->timer(

@@ -14,6 +14,7 @@ use Plack::Builder;
 use App::Onion::Parser;
 use App::Onion::Web;
 use App::Onion::Watcher;
+use App::Onion::Options;
 
 # for debug
 use Data::Dumper;
@@ -48,19 +49,36 @@ GetOptions(
 
 my $conf = do $config_file or die;
 
+my $opt = App::Onion::Options->new(
+    port => $port,
+    host => $host,
+    no_web => $no_web,
+    no_watcher => $no_watcher,
+    interval => $interval,
+);
+if ($notify_to_phone eq 'notifo') {
+    my $notifier = App::Onion::Notify::Notifo->new(
+        username => $conf->{notifo_username},
+        apisecret => $conf->{notifo_apisecret},
+    );
+    $opt->add_notifier($notifier);
+} elsif ($notify_to_phone eq 'imkayac') {
+    my $notifier = App::Onion::Notify::ImKayac->new(
+        username => $conf->{im_kayac_username},
+    );
+    $opt->add_notifier($notifier);
+}
+
 # setup supervisor
 my $proclet = Proclet->new(color => 1);
 
 # add watcher to supervisor
 unless ($no_watcher) {
     my $watcher = App::Onion::Watcher->app(
-        site         => $url,
-        email        => $conf->{login_mail},
-        password     => $conf->{login_password},
-        notify       => $notify_to_phone,
-        message_open => $auto_message_open,
-        no_web       => $no_web,
-        interval     => $interval,
+        site     => $url,
+        email    => $conf->{login_mail},
+        password => $conf->{login_password},
+        opt      => $opt,
     );
     $proclet->service(
         code   => $watcher,

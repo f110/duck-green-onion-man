@@ -16,7 +16,7 @@ has site => (
 );
 has opt => (
     is  => 'ro',
-    isa => 'App::Onion::Watcher::Options',
+    isa => 'App::Onion::Options',
 );
 has cv => (
     is => 'ro',

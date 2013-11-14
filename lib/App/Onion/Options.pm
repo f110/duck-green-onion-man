@@ -47,6 +47,11 @@ has notifies => (
         add_notifier => 'push',
     },
 );
+has notify => (
+    is => 'ro',
+    isa => 'Bool',
+    default => 0,
+);
 
 1;
 __END__

@@ -56,7 +56,7 @@ sub timer_callback {
         my ($hour, $min, $sec) = Date::Calc::Now();
         say "--------------------";
         say "New Message!";
-        say $hour.":".$min.":".$sec;
+        say sprintf("%02d:%02d:%02d", $hour, $min, $sec);
         say "--------------------";
 
         my $url = $self->site->clone;
@@ -67,7 +67,6 @@ sub timer_callback {
         });
 
         my $res = $self->mech->get($url);
-        my $decoded_content = $res->decoded_content;
         my $parser = App::Onion::Parser->build(
             target => "view_message",
             content => $res->decoded_content,

@@ -121,7 +121,10 @@ sub BUILD {
         $self->cv->send("Connection Lost!!");
         return;
     }
-    my $parse = App::Onion::Parser->new($res->decoded_content);
+    my $parse = App::Onion::Parser->build(
+        target => "list_message",
+        content => $res->decoded_content,
+    );
     my @new_message_ids = $parse->get_message_ids;
 
     my @Ronly = calc_new_message_ids($self->db->fetch_id_list, \@new_message_ids);

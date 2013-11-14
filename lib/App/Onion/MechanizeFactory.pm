@@ -6,9 +6,10 @@ use App::Onion::Mechanize;
 use WWW::Mechanize::Plugin::FollowMetaRedirect;
 
 sub logged_in {
-    my ($class, $url, $email, $password);
+    my ($class, $url, $email, $password) = @_;
 
-    my $mech = App::Onion::Mechanize->new($url);
+    my $mech = App::Onion::Mechanize->new;
+    $mech->get($url);
     $mech->login($email, $password);
     $mech->follow_meta_redirect;
 

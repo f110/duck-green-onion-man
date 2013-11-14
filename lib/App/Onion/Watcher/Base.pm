@@ -5,7 +5,7 @@ use Mouse::Role;
 
 has db => (
     is => 'ro',
-    isa => 'App::Onion::Watcher::DB',
+    does => 'App::Onion::DB',
 );
 
 requires 'timer_callback';

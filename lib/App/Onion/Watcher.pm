@@ -25,7 +25,7 @@ sub app {
             mech => $mech,
             cv   => $cv,
             site => $uri,
-            db   => App::Onion::Watcher::DB::DBM->new,
+            db   => App::Onion::DB::DBM->new,
             opt  => $args{opt},
         );
 

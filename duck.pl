@@ -23,7 +23,7 @@ my $url = q#http://mixi.jp/#;
 
 my $debug;
 my $growl_notify;
-my $notify_to_phone; # 0 or "kayac" or "notifo"
+my $notify_to_phone = ""; # "" or "kayac" or "notifo"
 my $auto_message_open;
 my $interval = 15;
 my $use_local_hosts;
@@ -55,6 +55,7 @@ my $opt = App::Onion::Options->new(
     no_web => $no_web,
     no_watcher => $no_watcher,
     interval => $interval,
+    message_open => $auto_message_open,
 );
 if ($notify_to_phone eq 'notifo') {
     my $notifier = App::Onion::Notify::Notifo->new(

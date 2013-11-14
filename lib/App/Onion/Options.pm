@@ -23,6 +23,11 @@ has no_watcher => (
     isa => 'Bool',
     default => 0,
 );
+has message_open => (
+    is => 'ro',
+    isa => 'Bool',
+    default => 0,
+);
 has hosts => (
     is => 'ro',
     isa => 'HashRef',

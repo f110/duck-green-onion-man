@@ -1,42 +1,56 @@
 use strict;
 use warnings;
+
 use Test::More;
 
 BEGIN {
-    use_ok "App::Onion::Parser";
-    use_ok "App::Onion::Parser::ListMessage";
+    use_ok 'App::Onion::Parser';
+    use_ok 'App::Onion::Parser::ViewMessage';
 }
 
 my $html = do { local $/; <DATA> };
 
-subtest "get_message_ids" => sub {
+subtest 'can_ok' => sub {
+    can_ok 'App::Onion::Parser::ViewMessage', qw(parse);
+};
+
+subtest 'parse with html' => sub {
     my $parser = App::Onion::Parser->build(
-        target => "list_message",
+        target => 'view_message',
         content => $html,
     );
-    my @message_ids = $parser->get_message_ids;
-
-    is_deeply \@message_ids, [qw/3739154590748419400/];
-};
-
-subtest "get_message_ids but couldn't get html" => sub {
-    my $parser = App::Onion::Parser->build(
-        target => "list_message",
-        content => "",
-    );
-    my @message_ids = $parser->get_message_ids;
-
-    is @message_ids, 0;
-};
-
-subtest "get_message_ids but get an other dom tree like error page" => sub {
-    my $parser = App::Onion::Parser->build(
-        target => "list_message",
-        content => "<html><body>error</body></html>",
-    );
-    my @message_ids = $parser->get_message_ids;
-
-    is @message_ids, 0;
+    my $got = $parser->parse;
+    is_deeply $got, {
+        member => [
+            {
+                id => 52,
+                nickname => "fuga",
+            },
+        ],
+        message => [
+            {
+                sender => 52,
+                body => "ふが",
+                thread_id => "3739154590748419400",
+                id => "95d6eefe2eb77958dab3c3c5a887b2d0",
+                url => "http://sc.mixi.org/view_thread_message.pl?thread_id=3739154590748419400&id=95d6eefe2eb77958dab3c3c5a887b2d0&box=inbox",
+                timestamp => '10:13',
+            },
+            {
+                sender => '@me',
+                body => "おれおれ",
+                timestamp => '10:25',
+            },
+            {
+                sender => 52,
+                body => "ぴよ",
+                thread_id => '3739154590748419400',
+                id => '035e57ab2dd4783c9297d079c6571e0f',
+                url => "http://sc.mixi.org/view_thread_message.pl?thread_id=3739154590748419400&id=035e57ab2dd4783c9297d079c6571e0f&box=inbox",
+                timestamp => '13:24',
+            },
+        ],
+    };
 };
 
 done_testing;
@@ -46,9 +60,9 @@ __DATA__
 
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" class="osMacOSX browserChrome browserChrome31 serviceMessage pageListMessageOrgMixiSc domainOrgMixiSc">
+<html xmlns="http://www.w3.org/1999/xhtml" class="osMacOSX browserChrome browserChrome31 serviceMessage pageViewMessageOrgMixiSc domainOrgMixiSc">
 <head>
-<title> メッセージ一覧</title>
+<title> fugaさんとのメッセージ</title>
 
 <!-- header meta values -->
 <meta http-equiv="Content-Type" content="text/html; charset=euc-jp"  />
@@ -73,7 +87,8 @@ __DATA__
 <link rel="stylesheet" type="text/css" href="http://img.mixi.net/static/css/basic/skin/component_gray.css?1384396631" />
 <link rel="stylesheet" type="text/css" href="http://img.mixi.net/static/css/basic/skin/message_gray.css?1384396631" />
 <link rel="stylesheet" type="text/css" href="http://img.mixi.net/static/css/basic/message.css?1384396631" />
-<link rel="stylesheet" type="text/css" href="http://img.mixi.net/static/css/basic/macfix.css?1384396631" />
+<link rel="stylesheet" type="text/css" href="http://img.mixi.net/static/css/basic/macfix.css?1384396631" /><link rel="stylesheet" type="text/css" href="http://img.mixi.net/static/css/page/decolink.css?1384396631" />
+<link rel="stylesheet" type="text/css" href="http://img.mixi.net/static/css/emoji_palette.css?1384396631" />
 <link href="http://img.mixi.net/img/basic/favicon.ico"  type="image/vnd.microsoft.icon"  rel="icon"         /><link href="http://img.mixi.net/img/basic/favicon.ico"  type="image/vnd.microsoft.icon"  rel="shortcut icon"         /><link href="http://img.mixi.net/img/smartphone/touch/favicon/x001_prec.png"    rel="apple-touch-icon-precomposed"         />
 <!-- / header css and links -->
 
@@ -84,7 +99,7 @@ __DATA__
             window.Mixi = {};
                 }
 
-    var json = {"url_mixi_prefix":"http://sc.mixi.org/","url_mixi_plugin_prefix":"","url_fan_page_redirector_prefix":"","CONFIG_IMG_BASE":"http://img.mixi.net","url_self_ad_prefix":"","url_mobile_fan_apps_runtime":"","url_mall_prefix":"http://sc.mixi.org/not_yet/","url_mixi_static_prefix":"","url_download_prefix":"","page_encoding":"euc-jp","url_ad_api_mobile_prefix":"","url_external_script_prefix":"","url_mixi_prefix_ssl":"http://sc.mixi.org/","url_marketplace_prefix_ssl":"","url_fan_prefix":"","url_pic_logo_base":"http://community.img.sc.mixi.org/photo/comm","STATIC_FILE_BASE":"http://img.mixi.net","url_photo_prefix":"http://sc.mixi.org/not_yet/","url_mixi_plugin_prefix_ssl":"","url_application_sap_prefix":"","ad_iframe_id":null,"url_mall_no_login_top":"","url_mobile_mall_prefix":"","url_payment_prefix_ssl":"","url_news_prefix":"","url_adsmixi_prefix":"","url_ad_api_prefix":"","box":"inbox","rpc_post_key":"e357d75598bc8dc4bb1f786cd23ac199655390e4","url_mixi_static_prefix_ssl":"","url_corp_develop_prefix":"","RUN_MODE":"production","url_pic_logo_base_ssl":"https://community-img-sc.mixi.org/photo/comm","url_mobile_pr_prefix":"","url_partner_ads_prefix_ssl":"","url_pr_prefix":"","url_corp_prefix":"","url_seller_prefix_ssl":"","url_corp_page_prefix":"","url_video_prefix":"","news_prefix":"","url_mobile_prefix":"http://sc.mixi.org/","url_ad_impact_prefix":"","ad_page_id_list":null,"url_fan_apps_prefix":"","url_smartphone_game_prefix":"http://sc.mixi.org/not_yet/","url_img_ads_prefix":"","login_member_id":"50","url_gear_prefix_ssl":"","url_marketplace_prefix":"","url_upload_video_prefix":""};
+    var json = {"url_mixi_prefix":"http://sc.mixi.org/","url_mixi_plugin_prefix":"","url_fan_page_redirector_prefix":"","CONFIG_IMG_BASE":"http://img.mixi.net","url_self_ad_prefix":"","sender_image":"http://img.mixi.net/img/basic/common/noimage_member40.gif","url_mobile_fan_apps_runtime":"","url_mixi_static_prefix":"","url_mall_prefix":"http://sc.mixi.org/not_yet/","url_download_prefix":"","page_encoding":"euc-jp","url_ad_api_mobile_prefix":"","url_external_script_prefix":"","url_mixi_prefix_ssl":"http://sc.mixi.org/","url_fan_prefix":"","thread_id":"3739154590748419400","url_marketplace_prefix_ssl":"","url_pic_logo_base":"http://community.img.sc.mixi.org/photo/comm","STATIC_FILE_BASE":"http://img.mixi.net","sender_link":"show_profile.pl?id=50","url_photo_prefix":"http://sc.mixi.org/not_yet/","url_mixi_plugin_prefix_ssl":"","url_application_sap_prefix":"","ad_iframe_id":null,"url_mall_no_login_top":"","url_mobile_mall_prefix":"","url_payment_prefix_ssl":"","url_news_prefix":"","url_adsmixi_prefix":"","url_ad_api_prefix":"","rpc_post_key":"","url_mixi_static_prefix_ssl":"","url_pic_logo_base_ssl":"https://community-img-sc.mixi.org/photo/comm","url_corp_develop_prefix":"","RUN_MODE":"production","url_mobile_pr_prefix":"","url_partner_ads_prefix_ssl":"","url_pr_prefix":"","url_corp_prefix":"","url_seller_prefix_ssl":"","url_corp_page_prefix":"","is_talk":"1","url_video_prefix":"","news_prefix":"","url_mobile_prefix":"http://sc.mixi.org/","url_ad_impact_prefix":"","ad_page_id_list":null,"url_fan_apps_prefix":"","url_smartphone_game_prefix":"http://sc.mixi.org/not_yet/","url_img_ads_prefix":"","login_member_id":"50","url_gear_prefix_ssl":"","url_marketplace_prefix":"","fancyurl_schema":["http://mixi.jp/fancyurl_test_for_static.pl","http://photo.mixi.jp/view_album.pl?*","http://photo.mixi.jp/view_share_album.pl?*","http://www.clubdam.com/app/damtomo/karaokePost/StreamingKrk.do?karaokeContributeId=*&karaokeContributeIdBlogParts=*","http://mixi.jp/pr.pl?id=76&vegas=entry","http://mixi.jp/view_item.pl?*"],"url_upload_video_prefix":""};
         var value;
             window.Mixi.Gateway = {
                     getParam:function(key){
@@ -100,7 +115,7 @@ __DATA__
                                                                                                                             })();
                                                                                                                             --></script>
 
-<script type="text/javascript" src="/static/js/lib/prototype-effects-1.6.0.2-1.8.1-compress.js?1384396631"></script><script type="text/javascript" src="/static/js/lib/underscore-string-1.3.3-2.0.0-compress.js?1384396631"></script><script type="text/javascript" src="/static/js/lib/namespace-brook-compress.js?1384396631"></script><script type="text/javascript" src="/static/js/mixi.js?1384396631"></script><script type="text/javascript" src="/static/js/dragdrop.js?1384396631"></script><script type="text/javascript" src="/static/js/overlay.js?1384396631"></script><script type="text/javascript" src="/static/js/popup.js?1384396631"></script><script type="text/javascript" src="/static/js/windowstate.js?1384396631"></script><!-- / header javascript -->
+<script type="text/javascript" src="/static/js/lib/prototype-effects-1.6.0.2-1.8.1-compress.js?1384396631"></script><script type="text/javascript" src="/static/js/lib/underscore-string-1.3.3-2.0.0-compress.js?1384396631"></script><script type="text/javascript" src="/static/js/lib/namespace-brook-compress.js?1384396631"></script><script type="text/javascript" src="/static/js/mixi.js?1384396631"></script><script type="text/javascript" src="/static/js/mixi/oembed.js?1384396631"></script><script type="text/javascript" src="/static/js/lib/swfobject-1.5.1-compress.js?1384396631"></script><script type="text/javascript" src="/static/js/mixi/util/namespace.js?1384396631"></script><script type="text/javascript" src="/static/js/mixi/message/message.js?1384396631"></script><!-- / header javascript -->
 
 
 
@@ -317,18 +332,20 @@ if (window != top) top.location.href = location.href;
 
 
 
+
+
 <!--[BodyArea]-->
 <div id="bodyArea" class="message">
 
 <!--[BodyMainArea]-->
-<div id="bodyMainArea">
+<div id="bodyMainArea" class="widget" data-widget-namespace="jp.mixi.message.pc.widget.viewthread.background">
 
-<div class="pageTitle homeTitle005"><h2>hogeのメッセージ一覧</h2></div>
+<div class="pageTitle homeTitle005"><h2>hogeのメッセージ</h2></div>
 
 <!--[ContentsArea]-->
 <div id="contentsArea" class="clearfix">
 
-<!--[SubArea]-->
+<!--[subArea]-->
 <div id="subArea">
 
 <div id="compose" class="sideBlock">
@@ -348,7 +365,7 @@ if (window != top) top.location.href = location.href;
 
 <!--/subArea--></div>
 
-<!--/[SubArea]-->
+<!--/[subArea]-->
 
 <!--[MainArea]-->
 <div id="mainArea">
@@ -356,70 +373,135 @@ if (window != top) top.location.href = location.href;
 <div class="extraWrap01">
 
 <div class="extraInner">
+<div class="heading clearfix">
+<p class="headingNavi"><a href="http://sc.mixi.org/list_message.pl?box=inbox&page=1">&lt;&lt;&nbsp;メッセージ一覧へ戻る</a></p>
+<ul class="toolbar">
 
-<div class="heading">
-<h3 class="list">メッセージ一覧</h3>
+<li>
+<a class="widget delete" data-widget-namespace="jp.mixi.message.pc.widget.viewthread.movetotrash"
+    data-thread-id="3739154590748419400"
+        data-confirm-message="fugaさんとのメッセージを削除しますか？"
+            data-completion-location="list_message.pl?box=inbox"
+                href="javascript:void(0);">削除する</a>
+                </li>
+
+</ul>
 </div>
 
 <div class="contents">
 
-<!-- no message -->
+<div class="messageDialog">
 
-<!--[messageListArea]-->
-<div class="messageListArea">
-<div class="pageNavigation01 top">
-<div class="pageList02">
-<ul><li rel="__display">1件～1件を表示</li></ul>
-</div>
-<!--/pageNavigation01--></div>
+<h3 class="dialogHeader"><a href="show_friend.pl?id=52"><span class="memberName">fuga</span></a>さんとのメッセージ</h3>
 
-<form name="delete_message_form" action="move_message.pl?box=inbox&move_to_trash=1" method="post">
+<div class="widget dialogBlockLink"
+   data-widget-namespace="jp.mixi.message.pc.widget.viewthread.morelink"
+      data-has-previous-message="0"
+         data-render-target-element-class=".JS_messageList"
+            data-morelink-element-id="#JS_moreLink"
+               data-loading-element-id="#JS_moreLinkLoading"
+               >
+               <p id="JS_moreLink" style="display : none;"><a class="upstream" href="javascript:void(0);">過去のメッセージを表示する</a></p>
+               <p id="JS_moreLinkLoading" class="dialogBlockLink loading" style="display : none;"></p>
+               </div>
 
-<div id="messageList" class="listMessage">
-
-<div class="messageListHead">
-<table class="tableHead">
-<tr>
-<th class="status">&nbsp;</th>
-<th class="sender">差出人</th>
-<th class="subject">件名・本文</th>
-<th class="date">日付</th>
-</tr>
-</table>
-</div>
-
-<div class="messageListBody">
-<input id="hidden_message_id" type="hidden" name="message_id" value="" />
-<input type="hidden" name="post_key" value="" />
-
-<table class="tableBody">
-<tr class="top ">
-<td class="status"><img class="reply" src="http://img.mixi.net/img/basic/icon/arrow_reply001.png" width="12" height="13" alt="返信済み" /></td>
-<td class="face">
+<div class="dialogBody widget JS_messageList"
+    data-widget-namespace="jp.mixi.message.pc.widget.viewthread.messagelist"
+        data-unread-messages-count="1"
+            data-thread-id="3739154590748419400"
+                data-boundary-message-id="95d6eefe2eb77958dab3c3c5a887b2d0"
+                    data-boundary-message-created-at="1384477993"
+                        data-conclusive-message-id="035e57ab2dd4783c9297d079c6571e0f"
+                            data-conclusive-message-created-at="1384489446">
 
 
-<a class="thumbnail" href="show_friend.pl?id=52">
-<img src="http://img.mixi.net/img/basic/common/noimage_member40.gif" alt="f111"width="40"height="40"></a>
+<div class="subject JS_messageSubjectRow"><h4>てすと</h4></div>
 
-</td>
-<td class="sender">fuga</td>
-<td class="subject"><span class="messageTitle"></span><a href="view_message.pl?thread_id=3739154590748419400&box=inbox&page=1">おれおれ</a></td>
-<td class="date">23分前</td>
-</tr>
+<div id="MID95d6eefe2eb77958dab3c3c5a887b2d0" class="JS_messageRow post receive ">
 
-</table>
+<p class="author"><span class="thumbnail"><a href="show_friend.pl?id=52"><img src="http://img.mixi.net/img/basic/common/noimage_member40.gif" alt="fuga" /></a></span>
+<span class="name">fuga</span></p>
 
+
+<div class="postBody"><span class="message">ふが</span>
 </div>
 
-<!--/messageList--></div>
-</form>
+<div class="postData">
 
-<div class="pageNavigation01 bottom">
-<div class="pageList02">
-<ul><li rel="__display">1件～1件を表示</li></ul>
+
+<p class="timestamp"><a href="http://sc.mixi.org/view_thread_message.pl?thread_id=3739154590748419400&id=95d6eefe2eb77958dab3c3c5a887b2d0&box=inbox">10:13</a></p>
+
+
 </div>
-<!--/pageNavigation01--></div>
-<!--/messageListArea--></div>
+<!--/post--></div>
+
+
+
+<div id="MID2da29ac8dd1b2a3774cbaa7fd4a7582c" class="JS_messageRow post send ">
+
+
+<div class="postBody"><span class="message">おれおれ</span>
+</div>
+
+<div class="postData">
+
+
+<p class="timestamp">10:25</p>
+
+
+</div>
+<!--/post--></div>
+
+
+
+<div id="MID035e57ab2dd4783c9297d079c6571e0f" class="JS_messageRow post receive ">
+
+<p class="author"><span class="thumbnail"><a href="show_friend.pl?id=52"><img src="http://img.mixi.net/img/basic/common/noimage_member40.gif" alt="fuga" /></a></span>
+<span class="name">fuga</span></p>
+
+
+<div class="postBody"><span class="message">ぴよ</span>
+</div>
+
+<div class="postData">
+
+
+<p class="timestamp"><a href="http://sc.mixi.org/view_thread_message.pl?thread_id=3739154590748419400&id=035e57ab2dd4783c9297d079c6571e0f&box=inbox">13:24</a></p>
+
+
+</div>
+<!--/post--></div>
+
+
+<!--/dialogBody--></div>
+
+<div class="widget JS_inputForm postForm"
+             data-widget-namespace="jp.mixi.message.pc.widget.viewthread.postmessage"
+                          data-input-textarea-class=".JS_textarea"
+                                       data-input-form-class=".JS_fileInputForm"
+                                                    data-submit-button-class=".JS_submitButton"
+                                                                 data-error-area-class=".JS_errorArea"
+                                                                              data-thread-id="3739154590748419400"
+                                                                                           data-latest-message-title="Re: てすと"
+                                                                                                        data-value-nickname="hoge"
+                                                                                                                     >
+
+<div class="inputArea" >
+<p class="JS_errorArea InputAlert" style="display:none"></p>
+<textarea name="body" id="messageBody" rows="3" class="JS_textarea widget" data-widget-namespace="jp.co.mixi.ui.textarea.autoresize" placeholder="メッセージを入力してください"></textarea><input type="submit" value="送信" class="JS_submitButton formBt01" />
+</div>
+
+
+<div class="option JS_fileInputForm" id="messageInput" >
+<input name="photo" id="media" type="file">
+</div>
+<p class="supplement01"><a href="/agreement.pl?id=message" target="_blank">同意事項</a>（※必読）に同意して、送信してください。<br />メッセージの内容を確認する場合があります。</p>
+<!--/postForm--></div>
+
+
+
+
+<!--/messageDetail--></div>
 
 <div class="notes01">
 <p><img src="http://img.mixi.net/img/basic/icon/school001.gif" alt="同級生" />
@@ -428,6 +510,7 @@ if (window != top) top.location.href = location.href;
 <!--/contents--></div>
 
 <!--/extraInner--></div>
+
 <!--/extraWrap01--></div>
 
 <ul class="moreLink01 messageUtility clearfix">
@@ -440,7 +523,6 @@ if (window != top) top.location.href = location.href;
 
 <!--/contentsArea--></div>
 <!--/[ContentsArea]-->
-
 <!--/bodyMainArea--></div>
 <!--/[BodyMainArea]-->
 
@@ -473,7 +555,7 @@ if (window != top) top.location.href = location.href;
 
 
 
-
+ 
 
 
 
@@ -551,6 +633,56 @@ if (window != top) top.location.href = location.href;
 <!--/bodyArea--></div>
 <!--/[BodyArea]-->
 
+<div id="emoji_palette" class="emoji_palette"><div class="emoji_palette_title" onclick="closeEmojiPalette();" align="left">
+<div id="emoji_palette_title_left" class="emoji_palette_title_left"></div><div class="emoji_palette_title_right"><a href="javascript:void(0)" onclick="return false;" class="emoji_palette_image_close"><img src="http://img.mixi.net/img/p_close_rev.gif" alt="close" class="emoji_palette_image_close" height="11" width="12" /></a></div></div>
+<div class="emoji_palette_body">
+  <table align="center" border="0" cellpadding="0" cellspacing="2">
+      <tbody></tbody>
+          <tbody id="ads_area"></tbody>
+            </table>
+            </div>
+            </div>
+
+<!-- decomessage -->
+<div id="decometag_template"><!--<decome src="<TMPL_VAR NAME="id">">--></div>
+<div class="utilityWindow02" id="decomessage_selector" style="display:none;"></div>
+<!-- /decomessage -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -592,8 +724,119 @@ if (window != top) top.location.href = location.href;
 <!--/[FooterArea]-->
 
 </div><!--/page-->
+<div style="display:none" class="HTML_TEMPLATE" id="decoMessageTemplate"><!--<div class="layerHeading02">
+<h2><TMPL_VAR EXPR="html_escape(nickname)">のメッセージ素材</h2>
+<span class="close"><img src="<TMPL_VAR NAME=CONFIG_IMG_BASE ESCAPE=0>/img/basic/button/close006.gif" alt="閉じる" class="closeBtn" /></span>
+</div>
+
+<div class="contents">
+
+<TMPL_IF NAME='hasItems'>
+<div class="tab01">
+<ul>
+<li><a href="javascript:void(null);" class="all"><span>全て</span></a></li>&nbsp;<li><a href="javascript:void(null);" class="decome"><span>デコメッセージ素材</span></a></li>&nbsp;<li><a href="javascript:void(null);" class="grica"><span>グリカ素材</span></a></li>
+</ul>
+</div>
+<TMPL_ELSE>
+<div class="tab01">
+<ul>
+<li><span class="disabled"><span>全て</span></span></li>&nbsp;<li><span class="disabled"><span>デコメッセージ素材</span></span></li>&nbsp;<li><span class="disabled"><span>グリカ素材</span></span></li>
+</ul>
+</div>
+</TMPL_IF>
+
+<div class="contentsBody">
+
+<TMPL_IF NAME='hasItems'>
+<div class="category01">
+<p>カテゴリで絞り込み</p><select name="decoCategory" id="decoCategory">
+<option value="">全て</option>
+<TMPL_LOOP NAME='genres'>
+<option value="<TMPL_VAR EXPR="html_escape(id)">"<TMPL_IF NAME='is_selected'> selected="selected"</TMPL_IF>><TMPL_VAR EXPR="html_escape(name)"></option>
+</TMPL_LOOP>
+</select>
+</div>
+
+<TMPL_IF NAME='hasItemsOnThisGenre'>
+<div class="slideList01">
+<ul>
+<TMPL_LOOP NAME='items'>
+<li id="item<TMPL_VAR EXPR="html_escape(contents_id)">"><span class="thumb"><img src="<TMPL_VAR EXPR="html_escape(thumbnail_pc_url)">" class="thumbImg" /></span><span class="btn"><a href="javascript:void(null);" title="メッセージに貼る"><img src="<TMPL_VAR NAME=CONFIG_IMG_BASE ESCAPE=0>/img/basic/button/paste001.gif" alt="メッセージに貼る" width="120" height="23" /></a></span></li>
+</TMPL_LOOP>
+</ul>
+<div class="slider" style="display:none;">
+<div class="up"></div>
+<div class="handle"></div>
+<div class="down"></div>
+</div>
+</div>
+
+<TMPL_ELSE>
+<div class="messageArea">
+<div class="contents">
+<div style="padding-top:64px; padding-bottom:64px;">
+<p class="nothing"><img src="<TMPL_VAR NAME=CONFIG_IMG_BASE ESCAPE=0>/img/basic/common/nothing.gif" alt="まだ何もありません"/></p>
+</div>
+</div>
+</div>
+</TMPL_IF>
 
 
+
+<TMPL_ELSE>
+<div class="decomessageAlert">
+<p>まだデコメッセージの素材を持っていません。いますぐGETしちゃおう！</p>
+<p><a href="promotion.pl?id=mobile_access" target="_blank">詳しくは「mixiモバイル」から</a></p>
+</div>
+</TMPL_IF>
+
+</div>
+
+</div>
+--></div><div style="display:none" class="HTML_TEMPLATE" id="delConfirmThreadMessageTemplate"><!--<div class="editList01">
+<div class="layerHeading01 clearfix">
+<h2>メッセージ削除の確認</h2>
+<a href="javascript:void(0);" id='' class='closeButton' ><img src="<TMPL_VAR NAME=CONFIG_IMG_BASE ESCAPE=0>/img/basic/button/close005.gif" alt="閉じる" title="閉じる" /></a>
+</div>
+<div class="contents">
+<p class="notes02"><TMPL_VAR EXPR="html_escape(message)"></p>
+
+</div>
+
+<ul class="formButtons01">
+<li><input type="submit" class="formBt01 submitButton" value="完全に削除する" /></li>
+<li><input type="submit" class="formBt02 closeButton" value="やめる" /></li>
+</ul>
+
+</div>
+--></div>
+<div style="display:none" data-last-update-time="1384396634" class="HTML_TEMPLATE" id="message_snippet"><!--<TMPL_IF NAME="is_new_topic">
+<div class="subject JS_messageSubjectRow"><h4><TMPL_VAR EXPR="html_escape(subject)"></h4></div>
+</TMPL_IF>
+<div id="MID<TMPL_VAR EXPR="html_escape(message_id)">" class="JS_messageRow post <TMPL_IF NAME="is_own">send<TMPL_ELSE>receive</TMPL_IF> <TMPL_IF NAME="is_system_message">system</TMPL_IF>"<TMPL_IF NAME=deleted> style="display:none"</TMPL_IF>>
+<TMPL_UNLESS EXPR="is_own || is_system_message">
+<p class="author"><span class="thumbnail"><TMPL_IF NAME="nickname"><a href="<TMPL_VAR EXPR="html_escape(sender_link)">"><img src="<TMPL_VAR EXPR="html_escape(image)">" alt="<TMPL_VAR EXPR="html_escape(nickname)">" /></a><TMPL_ELSE><a><img src="<TMPL_VAR EXPR="html_escape(image)">" alt="" /></a></TMPL_IF></span>
+<span class="name"><TMPL_IF NAME="nickname"><TMPL_VAR EXPR="html_escape(nickname)"><TMPL_ELSE>退会したユーザー</TMPL_IF></span><TMPL_IF NAME="use_icon"><TMPL_VAR NAME="icon_html" ESCAPE=0></TMPL_IF></p>
+</TMPL_UNLESS>
+<TMPL_IF NAME="is_post">
+<div class="postBody"><span class="message JS_postBody"><TMPL_VAR EXPR="lf_to_br(html_escape(body))"></span></div>
+<TMPL_IF NAME="image_html">
+<div class="postBody JS_postImage"><TMPL_VAR EXPR="lf_to_br(image_html)"></div>
+</TMPL_IF>
+<TMPL_ELSE>
+<div class="postBody"><TMPL_VAR NAME="body_html" ESCAPE=0></div>
+</TMPL_IF>
+<div class="postData">
+<TMPL_UNLESS EXPR="is_system_message">
+<TMPL_IF NAME="is_own">
+<p class="timestamp"><TMPL_VAR EXPR="html_escape(created_at)"></p>
+<TMPL_ELSE>
+<p class="timestamp"><a href="<TMPL_VAR NAME="url_mixi_prefix">view_thread_message.pl?thread_id=<TMPL_VAR EXPR="html_escape(thread_id)">&id=<TMPL_VAR EXPR="html_escape(message_id)">&box=inbox"><TMPL_VAR EXPR="html_escape(created_at)"></a></p>
+</TMPL_IF>
+</TMPL_UNLESS>
+</div>
+</div>
+--></div>
 
 
 
@@ -607,18 +850,53 @@ if (window != top) top.location.href = location.href;
 
 <script type="text/javascript" src="/static/js/lib/jquery-1.7.1.min-noconflict-compress.js?1384396631"></script>
 <script type="text/javascript" charset="UTF-8" src="/static/js/mixi/featuredcontents/searchform.production.js?1384396631"></script>
-<script type="text/javascript" src="/static/js/mixi/util/namespace.js?1384396631"></script>
+<script type="text/javascript" src="/static/js/lib/slider-1.8.1.js?1384396631"></script>
+<script type="text/javascript" src="/static/js/mixi/message/message.js?1384396631"></script>
+<script type="text/javascript" src="/static/js/overlay.js?1384396631"></script>
+<script type="text/javascript" src="/static/js/popup.js?1384396631"></script>
+<script type="text/javascript" src="/static/js/windowstate.js?1384396631"></script>
 <script type="text/javascript" src="/static/js/mixi/class/baseclass.js?1384396631"></script>
-<script type="text/javascript" src="/static/js/mixi/event/eventdispatcher.js?1384396631"></script>
 <script type="text/javascript" src="/static/js/mixi/popup/simplepopup.js?1384396631"></script>
-<script type="text/javascript" src="/static/js/list_message.js?1384396631"></script>
+<script type="text/javascript" src="/static/js/view_message.js?1384396631"></script>
+<script type="text/javascript" src="/static/js/jp/mixi/message/pc/widget/viewthread/reply.js?1384396631"></script>
+<script type="text/javascript" src="/static/js/jp/mixi/message/pc/widget/viewthread/movetotrash.js?1384396631"></script>
+<script type="text/javascript" src="/static/js/jp/mixi/message/pc/widget/viewthread/morelink.js?1384396631"></script>
+<script type="text/javascript" src="/static/js/jp/mixi/message/pc/widget/viewthread/postmessage.js?1384396631"></script>
+<script type="text/javascript" src="/static/js/jp/mixi/message/pc/widget/viewthread/background.js?1384396631"></script>
+<script type="text/javascript" src="/static/js/jp/mixi/message/pc/widget/viewthread/messagelist.js?1384396631"></script>
+<script type="text/javascript" src="/static/js/jp/mixi/message/pc/widget/viewthread/pollnewmessage.js?1384396631"></script>
+<script type="text/javascript" src="/static/js/jp/mixi/message/pc/ui/viewthread/leavethread.js?1384396631"></script>
+<script type="text/javascript" src="/static/js/jp/mixi/message/pc/widget/viewthread/leavethread.js?1384396631"></script>
+<script type="text/javascript" src="/static/js/jp/mixi/message/pc/widget/birthdaymessage/confirminvitation.js?1384396631"></script>
+<script type="text/javascript" src="/static/js/emoji_palette_base.js?1384396631"></script>
+<script type="text/javascript" src="/static/js/emoji_palette.js?1384396631"></script>
+<script type="text/javascript" src="/static/js/mixi/event/eventdispatcher.js?1384396631"></script>
+<script type="text/javascript" src="/static/js/lib/html/template_production.js?1384396631"></script>
+<script type="text/javascript" src="/static/js/mixi/message/queue.js?1384396631"></script>
+<script type="text/javascript" src="/static/js/mixi/popup/error.js?1384396631"></script>
+<script type="text/javascript" src="/static/js/mixi/message/decomessage_selector.js?1384396631"></script>
+<script type="text/javascript" src="/static/js/mixi/message/send_message.js?1384396631"></script>
+<script type="text/javascript" src="/static/js/mixi/model/utils.js?1384396631"></script>
+<script type="text/javascript" src="/static/js/mixi/common/string.js?1384396631"></script>
+<script type="text/javascript" src="/static/js/jp/co/mixi/lang/class.js?1384396631"></script>
+<script type="text/javascript" src="/static/js/jp/co/mixi/lang.js?1384396631"></script>
+<script type="text/javascript" src="/static/js/jp/co/mixi/net/jsonrpc.js?1384396631"></script>
+<script type="text/javascript" src="/static/js/jp/co/mixi/net/jsonrpc/engine.js?1384396631"></script>
+<script type="text/javascript" src="/static/js/jp/co/mixi/net/jsonrpc/uploader.js?1384396631"></script>
+<script type="text/javascript" src="/static/js/jp/co/mixi/net/utils.js?1384396631"></script>
+<script type="text/javascript" src="/static/js/jp/co/mixi/net/httprequester.js?1384396631"></script>
+<script type="text/javascript" src="/static/js/jp/co/mixi/ui/template.js?1384396631"></script>
+<script type="text/javascript" src="/static/js/mixi/model/message.js?1384396631"></script>
+<script type="text/javascript" src="/static/js/jp/mixi/message/util/cookie.js?1384396631"></script>
+<script type="text/javascript" src="/static/js/jp/mixi/message/util/diffusivepoll.js?1384396631"></script>
+<script type="text/javascript" src="/static/js/mixi/common/ui/textarea/autoresize.js?1384396631"></script>
 <script type="text/javascript" src="/static/js/mixi/analysis.production.js?1384396631"></script>
 <script type="text/javascript" src="/static/js/lib/prototype/replacer_for_array_prototype.js?1384396631"></script>
 <script type="text/javascript" src="/static/js/mixi/ad/other.production.js?1384396631"></script>
 <script type="text/javascript" src="/static/js/jp/co/mixi/logging.production.js?1384396631"></script>
 
 <script type="text/javascript"><!--//<![CDATA[
-Mixi.Analysis.setAttribute(["sc.mixi.org/list_message.pl","",""],["a40","g1","ar1","p1","pc"],[""],["",""],["message","","","",decodeURIComponent("")]);
+Mixi.Analysis.setAttribute(["sc.mixi.org/view_message.pl","",""],["a40","g1","ar1","p1","pc"],[""],["",""],["message","","","",decodeURIComponent("")]);
 
 Mixi.Analysis.invoke();
 

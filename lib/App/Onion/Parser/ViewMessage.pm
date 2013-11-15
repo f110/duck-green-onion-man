@@ -7,66 +7,119 @@ use parent qw(App::Onion::Parser::Base);
 use HTML::TreeBuilder::XPath;
 use URI;
 
-sub get_sender {
+sub parse {
     my ($self) = @_;
     my $html = $self->{content};
+    use Data::Dumper;
 
-    return (undef, undef) unless $html;
-    my $node = __find_nodes($html, q{//div[@class='messageDetailHead']/dl/dd/a})->pop;
-    return (undef, undef) unless $node;
+    return {} unless $html;
 
-    my $profile_url = URI->new($node->attr("href"));
-    my $sender_name = $node->as_text;
-    my %query = $profile_url->query_form;
+    my $nodes = __find_nodes($html, q{//div});
+    my @messages;
+    for my $node (@$nodes) {
+        next unless defined $node->attr('class');
+        next unless $node->attr('class') =~ /JS_messageRow/;
+        my $result = __parse_message_row($node);
+        push @messages, $result;
+    }
+    my %members = map {
+        $_->{id} => $_->{name};
+    } grep {
+        defined $_->{id} && defined $_->{name};
+    } @messages;
 
-    return ($sender_name, $query{id});
+    my @member;
+    while (my ($id, $name) = each %members) {
+        push @member, {
+            id => $id,
+            nickname => $name,
+        };
+    }
+    return {
+        member => \@member,
+        message => [
+            map {
+                my %query = URI->new($_->{url})->query_form;
+                +{
+                    sender => $_->{id} ? $_->{id} : '@me',
+                    body      => $_->{body},
+                    timestamp => $_->{timestamp},
+                    $_->{url}         ? (url       => $_->{url}) : (),
+                    $query{id}        ? (id        => $query{id}) : (),
+                    $query{thread_id} ? (thread_id => $query{thread_id}) : (),
+                }
+            } @messages
+        ],
+    };
 }
 
-sub get_body {
-    my ($self) = @_;
-    my $html = $self->{content};
-    return unless $html;
+sub __parse_message_row {
+    my ($node) = @_;
 
-    my $body_node = __find_nodes($html, q{//div[@id="message_body"]})->[0];
-    return if not defined $body_node;
-    my $content_ref = $body_node->content_array_ref;
+    my $message_row = {};
+    for my $child ($node->content_list) {
+        my $class_name = $child->attr('class');
+        next unless defined $class_name;
 
-    my $message_body;
-    foreach my $node (@$content_ref) {
-        if (ref $node eq "HTML::Element" and $node->tag eq "br") {
-            $message_body .= "\n";
-        } elsif (ref $node eq "HTML::Element" and $node->tag eq "a") {
-            $message_body .= $node->attr("href")."\n";
-        } else {
-            $message_body .= $node;
+        if ($class_name eq 'author') {
+            my ($id, $name) = __extract_author($child);
+            $message_row->{id} = $id;
+            $message_row->{name} = $name;
+        }
+
+        if ($class_name eq 'postBody') {
+            $message_row->{body} = __extract_body($child);
+        }
+
+        if ($class_name eq 'postData') {
+            $message_row->{timestamp} = __extract_timestamp($child);
+            $message_row->{url} = __extract_url($child);
         }
     }
 
-    return $message_body;
+    return $message_row;
 }
 
-sub get_title {
-    my ($self) = @_;
-    my $html = $self->{content};
-    return unless $html;
+sub __extract_author {
+    my ($node) = @_;
+    my $href = $node->content_array_ref->[0]->content_array_ref->[0]->attr('href');
 
-    my $title_node = __find_nodes($html, q{//div[@class="messageDetailHead"]})->[0];
-    return if not defined $title_node;
-    my $content_ref = $title_node->content_array_ref;
-
-    foreach my $node (@$content_ref) {
-        return $node->as_text if (ref $node eq "HTML::Element" and $node->tag eq "h3");
+    my ($id, $name) = undef;
+    if ($href) {
+        my %query = URI->new($href)->query_form;
+        $id = $query{id};
     }
+
+    my $name_node;
+    for my $n (@{$node->content_array_ref}) {
+        next unless defined $n;
+        next unless ref $n eq 'HTML::Element';
+        next unless $n->attr('class') eq 'name';
+        $name_node = $n;
+    }
+
+    return ($id, $name_node->as_text);
 }
 
-sub get_send_date {
-    my ($self) = @_;
-    my $html = $self->{content};
-    return unless $html;
+sub __extract_body {
+    my ($node) = @_;
 
-    my $date_node = __find_nodes($html, q{//div[@class="messageDetailHead"]/dl/dd})->[0];
-    return if not defined $date_node;
-    return $date_node->content_array_ref->[0];
+    return $node->content_array_ref->[0]->as_text;
+}
+
+sub __extract_timestamp {
+    my ($node) = @_;
+
+    return $node->content_array_ref->[0]->as_text;
+}
+
+sub __extract_url {
+    my ($node) = @_;
+
+    my $href_node = $node->content_array_ref->[0]->content_array_ref->[0];
+    return undef unless defined $href_node;
+    return undef unless ref $href_node eq 'HTML::Element';
+    return $href_node->attr('href');
 }
 
 sub __find_nodes {
@@ -84,7 +137,7 @@ __END__
 
 =head1 NAME
 
-App::Onion::Parser::ViewMessage - 
+App::Onion::Parser::ViewMessage -
 
 =head1 SYNOPSIS
 

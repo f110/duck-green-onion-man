@@ -16,7 +16,7 @@ sub get_message_ids {
     my @message_ids = map {
         my $uri = URI->new($_);
         my %query = $uri->query_form;
-        $query{id};
+        $query{thread_id};
     } @messages;
 
     return wantarray ? @message_ids : \@message_ids;

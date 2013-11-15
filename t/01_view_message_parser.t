@@ -21,12 +21,9 @@ subtest 'parse with html' => sub {
     );
     my $got = $parser->parse;
     is_deeply $got, {
-        member => [
-            {
-                id => 52,
-                nickname => "fuga",
-            },
-        ],
+        member => {
+            52 => "fuga",
+        },
         message => [
             {
                 sender => 52,

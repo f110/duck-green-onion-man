@@ -62,8 +62,8 @@ sub timer_callback {
         my $url = $self->site->clone;
         $url->path("view_message.pl");
         $url->query_form({
-            id => $id,
-            box => "inbox",
+            box       => "inbox",
+            thread_id => $id,
         });
 
         my $res = $self->mech->get($url);
@@ -72,22 +72,23 @@ sub timer_callback {
             target => "view_message",
             content => $res->decoded_content,
         );
-        my ($sender_name, $sender_id) = $parser->get_sender;
-        my $message_send_date = $parser->get_send_date;
-        my $message_title = $parser->get_title;
-        my $message_body = $parser->get_body;
+        my $messages = $parser->parse;
+        my $message = pop @{$messages->{message}};
+        my $sender_name = $messages->{member}->{$message->{nickname}};
+        my $sender_id = $message->{sender};
+        my $message_id = $message->{id};
+        my $message_body = $message->{body};
+        my $message_send_date = $message->{timestamp};
         if (defined $sender_name and defined $sender_id) {
             say "From: $sender_name";
             say "Sender ID: $sender_id";
-            say "Title: $message_title";
             say "Body: $message_body";
 
             $self->db->create_message({
-                id          => $id,
+                id          => $message_id,
                 sender      => $sender_id,
                 sender_name => $sender_name,
                 send_date   => $message_send_date,
-                title       => $message_title,
                 body        => $message_body,
             });
         } else {

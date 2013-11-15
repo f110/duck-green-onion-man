@@ -28,15 +28,8 @@ sub parse {
         defined $_->{id} && defined $_->{name};
     } @messages;
 
-    my @member;
-    while (my ($id, $name) = each %members) {
-        push @member, {
-            id => $id,
-            nickname => $name,
-        };
-    }
     return {
-        member => \@member,
+        member => \%members,
         message => [
             map {
                 my %query = URI->new($_->{url})->query_form;

@@ -10,7 +10,6 @@ use URI;
 sub parse {
     my ($self) = @_;
     my $html = $self->{content};
-    use Data::Dumper;
 
     return {} unless $html;
 

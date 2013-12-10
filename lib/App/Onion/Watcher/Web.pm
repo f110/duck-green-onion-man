@@ -72,13 +72,15 @@ sub timer_callback {
             content => $res->decoded_content,
         );
         my $messages = $parser->parse;
+
         my $message = pop @{$messages->{message}};
-        my $sender_name = $messages->{member}->{$message->{nickname}};
+        my $sender_name = ($message->{sender} =~ /^\d+/) ? $messages->{member}->{$message->{sender}} : $message->{sender};
         my $sender_id = $message->{sender};
         my $message_id = $message->{id};
         my $message_body = $message->{body};
         my $message_send_date = $message->{timestamp};
-        if (defined $sender_name and defined $sender_id) {
+
+        if (defined $sender_name and defined $sender_id and defined $message_id) {
             say "From: $sender_name";
             say "Sender ID: $sender_id";
             say "Body: $message_body";
@@ -94,7 +96,7 @@ sub timer_callback {
             warn "something wrong. unable to get sender name and id";
         }
         say "";
-        say "====================";
+        say "="x30;
 
         # open a browser when after write message detail to db
         # because web server using it

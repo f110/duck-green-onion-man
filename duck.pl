@@ -36,7 +36,7 @@ my $no_watcher;
 GetOptions(
     "d|debug"        => \$debug,
     "g|growl"        => \$growl_notify,
-    "m|message_open" => \$auto_message_open,
+    "m|message-open" => \$auto_message_open,
     "i|interval=s"   => \$interval,
     "p|port=s"       => \$port,
     "host=s"         => \$host,

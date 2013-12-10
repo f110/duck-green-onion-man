@@ -9,8 +9,7 @@ has raw => (
 );
 has id => (
     is => 'ro',
-    isa => 'Int',
-    default => 0,
+    isa => 'Str',
 );
 has sender => (
     is => 'ro',

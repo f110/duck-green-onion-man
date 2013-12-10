@@ -3,6 +3,7 @@ use strict;
 use warnings;
 use 5.010;
 use Mouse;
+use Encode;
 
 with 'App::Onion::Watcher::Base';
 
@@ -81,9 +82,9 @@ sub timer_callback {
         my $message_send_date = $message->{timestamp};
 
         if (defined $sender_name and defined $sender_id and defined $message_id) {
-            say "From: $sender_name";
+            say "From: ".Encode::encode_utf8($sender_name);
             say "Sender ID: $sender_id";
-            say "Body: $message_body";
+            say "Body: ".Encode::encode_utf8($message_body);
 
             $self->db->create_message({
                 id          => $message_id,
@@ -131,11 +132,11 @@ sub BUILD {
     my @Ronly = calc_new_message_ids($self->db->fetch_id_list, \@new_message_ids);
     return if scalar @Ronly < 1;
 
-    for my $id (@Ronly) {
-        $self->db->create_message({
-            $id => $id,
-        });
-    }
+    #for my $id (@Ronly) {
+        #$self->db->create_message({
+            #$id => $id,
+        #});
+    #}
 }
 
 sub calc_new_message_ids {

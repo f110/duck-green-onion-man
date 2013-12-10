@@ -1,6 +1,7 @@
 package App::Onion::Watcher;
 use strict;
 use warnings;
+use 5.010;
 use AnyEvent;
 use Carp;
 use URI;
@@ -30,11 +31,12 @@ sub app {
         );
 
         my $timer = AnyEvent->timer(
-            interval => $args{interval},
+            interval => $args{opt}->interval,
             cb => sub {
                 $watcher->timer_callback,
             },
         );
+        say 'start (interval: '.$args{opt}->interval.')';
         warn $cv->recv;
 
         croak 'die timer';

@@ -133,7 +133,7 @@ duck.pl - 監視スクリプト
 
 おすすめ実行コマンド
 
-    $ carton exec -- perl duck.pl --notify=notifo --message_open
+    $ carton exec -- perl duck.pl --notify=notifo --message-open
 
 =head1 DESCRIPTION
 

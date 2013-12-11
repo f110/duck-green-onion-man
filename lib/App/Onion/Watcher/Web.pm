@@ -102,7 +102,7 @@ sub timer_callback {
         # open a browser when after write message detail to db
         # because web server using it
         if ($self->opt->message_open && !$self->opt->no_web) {
-            my $view_message_url = sprintf("http://localhost:%d/message?id=%d", $self->opt->port, $id);
+            my $view_message_url = sprintf("http://localhost:%d/message?id=%s", $self->opt->port, $message_id);
             system qq#open "$view_message_url"#;
         }
     }

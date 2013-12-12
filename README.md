@@ -56,7 +56,7 @@ notifoの場合はユーザー名とAPI Secretをconfigファイルへ書く必�
 im.kayac.comは同時に複数のデバイスでSubscribeした場合は，後にログインした方のみに通知が飛びます．
 notifoは複数のデバイスでSubscribeした場合でもそれぞれのデバイスへ通知が飛びます．
 
-## --message_open -m
+## --message-open -m
 
 自動で新着メッセージを開きます．自動でメッセージ内のURLを開くのが怖い人はこちらがオススメ．
 

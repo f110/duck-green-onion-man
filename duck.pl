@@ -19,7 +19,7 @@ use App::Onion::Options;
 # for debug
 use Data::Dumper;
 
-my $url = q#http://mixi.jp/#;
+my $url = q#http://sc.mixi.org/#;
 
 my $debug;
 my $growl_notify;

@@ -26,7 +26,7 @@ my $message_ids = DBM::Deep->new(
     autoflush => 1,
 );
 
-my @TEAM = qw(A B C D E F);
+my @TEAM = qw(A B C D E F G H I);
 my %SENDER_ID_TO_TEAM;
 
 get '/' => sub {
